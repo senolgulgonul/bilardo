@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fizik bilardosu</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.3 (build 2026-10-30 21:12 UTC)">
+<meta name="version" content="1.4 (build 2026-10-30 21:34 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -95,7 +95,7 @@ details p{max-width:76ch;margin:10px 0}
     <div class="shotbar">
       <div class="pw"><label for="power">Güç</label>
         <input type="range" id="power" min="3" max="100" step="1" value="45"><output id="oPow"></output></div>
-      <div class="fine"><button id="aimL" aria-label="Nişanı sola çevir">↺ 0.2°</button><button id="aimR" aria-label="Nişanı sağa çevir">↻ 0.2°</button></div>
+      <div class="fine"><button id="aimL" aria-label="Nişanı sola çevir">↺ 0.1°</button><button id="aimR" aria-label="Nişanı sağa çevir">↻ 0.1°</button></div>
       <button id="shoot">Vur</button>
     </div>
     <div class="status" id="status" aria-live="polite"></div>
@@ -156,7 +156,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>3 top modunda masa 2.84 m × 1.42 m, cepsiz ve toplar 61.5 mm. Kenarlardaki elmaslar gerçek masadaki gibi eşit aralıklı; 3 bant sistemlerini (örneğin elmas sistemi) burada deneyebilirsin. Sol üstteki sayaç, ıstaka topunun kaç banda değdiğini canlı gösterir.</p>
     <p>Basitleştirmeler: ıstaka sapması (squirt), havada sekme, top–top sürtünmesi (throw) ve cep ağızlarındaki çene sekmeleri modellenmedi.</p>
   </details>
-  <footer class="credits">Fizik Bilardosu v1.3, build 2026-10-30 21:12 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
+  <footer class="credits">Fizik Bilardosu v1.4, build 2026-10-30 21:34 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
 </main>
 
 <script>
@@ -164,7 +164,7 @@ details p{max-width:76ch;margin:10px 0}
   const $ = id => document.getElementById(id);
   /* ---------- sabitler ---------- */
   let TW = 2.54, TH = 1.27, R = 0.028575;
-  const RW = 0.12, G = 9.81, MAXV = 7.5, TARGET = {carom:10, three:5};
+  const RW = 0.12, G = 9.81, MAXV = 10, TARGET = {carom:10, three:5};
   const MC = 0.075, MM = 0.055;
   const POOL_POCKETS = [
     {x:-0.006,y:-0.006,r:0.06},{x:TW/2,y:-0.012,r:0.05},{x:TW+0.006,y:-0.006,r:0.06},
@@ -181,6 +181,7 @@ details p{max-width:76ch;margin:10px 0}
   const GROUPNAME = {solid:'Düz toplar (1–7)', stripe:'Çizgili toplar (9–15)'};
   const fmt = (n, d) => { const t = n.toFixed(d); return /^-0\.?0*$/.test(t) ? t.slice(1) : t; };
 
+  const speedOf = pw => 0.15 + 7.35*pw + (MAXV - 7.5)*Math.pow(pw, 5);
   const PH = {};
   function readPhys(){
     PH.muS = +$('muS').value; PH.muR = +$('muR').value; PH.eC = +$('eC').value; PH.eB = +$('eB').value;
@@ -302,7 +303,7 @@ details p{max-width:76ch;margin:10px 0}
 
   function shoot(){
     if (moving || GM.over || !cue.on) return;
-    const pw = +$('power').value/100, v0 = 0.15 + pw*(MAXV - 0.15);
+    const pw = +$('power').value/100, v0 = speedOf(pw);
     const dx = Math.cos(aimA), dy = Math.sin(aimA);
     const Om = 5*v0*spinY/(2*R);
     cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
@@ -379,18 +380,19 @@ details p{max-width:76ch;margin:10px 0}
     if (!my && !GM.isBreak && !foul && obj.length){
       const t = typeOf(obj[0]); GM.groups[me] = t; GM.groups[1-me] = t === 'solid' ? 'stripe' : 'solid';
     }
-    const g = GM.groups[me];
+    const g = GM.groups[me], wasBreak = GM.isBreak, eightBack = wasBreak && s.potted.includes(8);
+    const potTxt = (obj.length ? ' Cebe giren: ' + obj.join(', ') + '.' : '') + (eightBack ? ' 8 numara açılışta girdi ve yerine kondu.' : '');
     const keep = !foul && (g ? obj.some(n => typeOf(n) === g) : obj.length > 0);
     GM.isBreak = false;
 
     if (foul){
       GM.turn = 1 - me; GM.inHand = true; GM.kitchen = false;
-      setStatus('Faul: ' + foul + '. Oyuncu ' + (GM.turn + 1) + ' beyazı istediği yere yerleştirebilir.');
+      setStatus('Faul: ' + foul + '. Oyuncu ' + (GM.turn + 1) + ' beyazı istediği yere yerleştirebilir.' + potTxt);
     } else if (keep){
-      setStatus(P + ' devam ediyor' + (obj.length ? ' (cebe giren: ' + obj.join(', ') + ')' : '') + '.');
+      setStatus(P + ' devam ediyor.' + potTxt + (wasBreak && !g ? ' Masa hâlâ açık.' : ''));
     } else {
       GM.turn = 1 - me;
-      setStatus('Sıra Oyuncu ' + (GM.turn + 1) + '’de.');
+      setStatus('Sıra Oyuncu ' + (GM.turn + 1) + '’de.' + potTxt);
     }
     renderPlayers(); updateButtons();
   }
@@ -479,7 +481,7 @@ details p{max-width:76ch;margin:10px 0}
     const sB = balls, sC = cue, sS = shot, sT = trail, sTT = trailT;
     balls = sB.map(b => Object.assign({}, b)); cue = balls[sB.indexOf(sC)];
     trail = []; trailT = 0;
-    const pw = +$('power').value/100, v0 = 0.15 + pw*(MAXV - 0.15), dx = Math.cos(aimA), dy = Math.sin(aimA), Om = 5*v0*spinY/(2*R);
+    const pw = +$('power').value/100, v0 = speedOf(pw), dx = Math.cos(aimA), dy = Math.sin(aimA), Om = 5*v0*spinY/(2*R);
     cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
     shot = {first:null, potted:[], hits:[], cush:0, cueBall:cue};
     const path = [[cue.x, cue.y]], marks = [], opath = []; let nh = 0, nc = 0, ob = null, obDone = false, cueDone = false;
@@ -698,11 +700,11 @@ details p{max-width:76ch;margin:10px 0}
   cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 
   /* ---------- kontroller ---------- */
-  function powLabel(){ const pw = +$('power').value; $('oPow').textContent = pw + '% (' + fmt(0.15 + pw/100*(MAXV - 0.15), 1) + ' m/s)'; }
+  function powLabel(){ const pw = +$('power').value; $('oPow').textContent = pw + '% (' + fmt(speedOf(pw/100), 1) + ' m/s)'; }
   $('power').addEventListener('input', powLabel);
   $('shoot').addEventListener('click', shoot);
-  $('aimL').addEventListener('click', () => aimA += 0.2*Math.PI/180);
-  $('aimR').addEventListener('click', () => aimA -= 0.2*Math.PI/180);
+  $('aimL').addEventListener('click', () => aimA += 0.1*Math.PI/180);
+  $('aimR').addEventListener('click', () => aimA -= 0.1*Math.PI/180);
   $('rerack').addEventListener('click', rack);
   $('mode').addEventListener('change', rack);
   const allWhite = () => false;

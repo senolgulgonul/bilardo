@@ -22,6 +22,8 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Toplar: konum, hız ve 3B açısal hız (wx, wy, wz). Kayma → yuvarlanma modeli, μ kayma 0.2, yuvarlanma direnci 0.01
 - Top–top e = 0.95, bant e = 0.75; bantta yan dönme teğet hızla etkileşir (falso)
 - Simülasyon sabit 1 ms adımla çalışır. Yol tahmini aynı motoru önceden koşturur; bu yüzden gerçek atış çizgiyi birebir izler. Adım sistemini değiştirirken determinizmi bozma!
+- Güç eğrisi `speedOf()`: alt ve orta güç eskisi gibi (7.35 m/s eğim), en üstte 10 m/s. Atış ve yol tahmini aynı fonksiyonu kullanır
+- İnce nişan: düğmeler 0.1°, ok tuşları 0.3°, Shift + ok 0.05°
 - Modellenmeyenler: squirt, throw, havada sekme, cep çenesi sekmeleri
 
 ## Oyun modları

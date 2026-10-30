@@ -3,6 +3,12 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.4 (2026-10-30 21:34 UTC)
+
+- Stronger top power: maximum shot speed is now 10 m/s (was 7.5); low and mid power feel the same, only the top of the slider is stronger. Breaks now pocket balls far more often
+- Fine aim buttons now turn 0.1° (was 0.2°)
+- 8-ball: the status line always says which balls went in, including on the break and on fouls, and notes when the 8-ball is respotted after the break
+
 ## v1.3 (2026-10-30 21:12 UTC)
 
 - Removed the head string line from the pool table for a cleaner look; on the break, the shaded area still shows where the cue ball can go
