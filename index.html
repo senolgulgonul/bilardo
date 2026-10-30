@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.1 (build 2026-10-30 20:50 UTC)">
+<meta name="version" content="1.2 (build 2026-10-30 21:04 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -122,7 +122,7 @@ details p{max-width:76ch;margin:10px 0}
     <div class="panel">
       <h2>Game</h2>
       <div class="ctl"><label for="mode">Mode</label>
-        <select id="mode">
+        <select id="mode" autocomplete="off">
           <option value="8ball" selected>8-ball, two players</option>
           <option value="free">Free practice (pool)</option>
           <option value="carom">Carom, straight rail</option>
@@ -156,7 +156,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.1, build 2026-10-30 20:50 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.2, build 2026-10-30 21:04 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
 </main>
 
 <script>
@@ -200,7 +200,7 @@ details p{max-width:76ch;margin:10px 0}
     if (isCarom()){
       const white = makeBall(0, TW/4, TH/2 - 0.1525), yellow = makeBall(20, TW/4, TH/2), red = makeBall(21, TW*3/4, TH/2);
       balls = [white, yellow, red]; cue = white;
-      GM.turn = 0; GM.scores = [0, 0]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false;
+      GM.turn = 0; GM.scores = [0, 0]; GM.groups = [null, null]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false;
       aimA = Math.atan2(red.y - white.y, red.x - white.x); moving = false; trail = [];
       setStatus((GM.mode === 'three' ? 'Three-cushion' : 'Carom') + ': Player 1 plays white, Player 2 yellow. To score, your ball must hit both other balls' +
         (GM.mode === 'three' ? ', touching at least 3 cushions before the second one.' : '.') + ' First to ' + TARGET[GM.mode] + ' wins.');

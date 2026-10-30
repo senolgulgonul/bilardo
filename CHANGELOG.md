@@ -3,6 +3,11 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.2 (2026-10-30 21:04 UTC)
+
+- Fix: Shoot did nothing in carom modes when the page loaded straight into carom (e.g. after a browser reload restored the mode menu)
+- Reloading the page now always starts in 8-ball
+
 ## v1.1 (2026-10-30 20:50 UTC)
 
 - Fix: Shoot button stayed disabled after a finished game when switching mode or re-racking without a page refresh

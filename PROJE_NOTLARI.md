@@ -35,4 +35,6 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - 3 topta "herkes beyazla" seçeneği istenmedi; resmî kural kalsın
 - Yol tahmini açık kalsın; "atıştan sonra göster" modu istenmedi
 - Güç ve Vur düğmesi masanın hemen altında olmalı
+- Yayında yalnızca İngilizce sürüm; dil geçiş bağlantısı şimdilik istenmedi (TR dosyası yine senkron tutulur)
+- Sayfa yenilenince her zaman 8 topla açılmalı
 - Kısa, sade metinler; LinkedIn’de kapanış "Built with Claude."

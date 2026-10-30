@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fizik bilardosu</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.1 (build 2026-10-30 20:50 UTC)">
+<meta name="version" content="1.2 (build 2026-10-30 21:04 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -122,7 +122,7 @@ details p{max-width:76ch;margin:10px 0}
     <div class="panel">
       <h2>Oyun</h2>
       <div class="ctl"><label for="mode">Mod</label>
-        <select id="mode">
+        <select id="mode" autocomplete="off">
           <option value="8ball" selected>8 top, iki oyuncu</option>
           <option value="free">Serbest antrenman (cepli)</option>
           <option value="carom">3 top, serbest karambol</option>
@@ -156,7 +156,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>3 top modunda masa 2.84 m × 1.42 m, cepsiz ve toplar 61.5 mm. Kenarlardaki elmaslar gerçek masadaki gibi eşit aralıklı; 3 bant sistemlerini (örneğin elmas sistemi) burada deneyebilirsin. Sol üstteki sayaç, ıstaka topunun kaç banda değdiğini canlı gösterir.</p>
     <p>Basitleştirmeler: ıstaka sapması (squirt), havada sekme, top–top sürtünmesi (throw) ve cep ağızlarındaki çene sekmeleri modellenmedi.</p>
   </details>
-  <footer class="credits">Fizik Bilardosu v1.1, build 2026-10-30 20:50 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
+  <footer class="credits">Fizik Bilardosu v1.2, build 2026-10-30 21:04 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
 </main>
 
 <script>
@@ -200,7 +200,7 @@ details p{max-width:76ch;margin:10px 0}
     if (isCarom()){
       const white = makeBall(0, TW/4, TH/2 - 0.1525), yellow = makeBall(20, TW/4, TH/2), red = makeBall(21, TW*3/4, TH/2);
       balls = [white, yellow, red]; cue = white;
-      GM.turn = 0; GM.scores = [0, 0]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false;
+      GM.turn = 0; GM.scores = [0, 0]; GM.groups = [null, null]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false;
       aimA = Math.atan2(red.y - white.y, red.x - white.x); moving = false; trail = [];
       setStatus('3 top' + (GM.mode === 'three' ? ', 3 bant' : '') + ': Oyuncu 1 beyaz topla başlar. Sayı için beyaz top sarıya ve kırmızıya çarpmalı' +
         (GM.mode === 'three' ? '; ikinci topa çarpmadan önce en az 3 banda değmeli.' : '.') + ' ' + TARGET[GM.mode] + ' sayıya ulaşan kazanır.');
