@@ -32,6 +32,7 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 ## Şenol’un tercihleri (verilen kararlar)
 - Beyazın izi ve "kayıyor/yuvarlanıyor" etiketi kaldırıldı, geri getirme
 - Masadaki başlangıç spot noktaları kaldırıldı
+- Baş çizgisi (head string) kaldırıldı, geri getirme; açılışta yalnızca gölgeli alan kalsın
 - 3 topta "herkes beyazla" seçeneği istenmedi; resmî kural kalsın
 - Yol tahmini açık kalsın; "atıştan sonra göster" modu istenmedi
 - Güç ve Vur düğmesi masanın hemen altında olmalı

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.2 (build 2026-10-30 21:04 UTC)">
+<meta name="version" content="1.3 (build 2026-10-30 21:12 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -156,7 +156,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.2, build 2026-10-30 21:04 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.3, build 2026-10-30 21:12 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
 </main>
 
 <script>
@@ -214,7 +214,7 @@ details p{max-width:76ch;margin:10px 0}
     GM.isBreak = true; GM.inHand = true; GM.kitchen = true;
     aimA = 0; moving = false; trail = [];
     setStatus(GM.mode === 'free' ? 'Free practice. Drag the cue ball anywhere and shoot as you like.'
-      : 'Break: Player 1. You can drag the cue ball anywhere behind the head string.');
+      : 'Break: Player 1. You can drag the cue ball anywhere in the shaded area on the left.');
     renderPlayers(); updateButtons();
   }
 
@@ -516,9 +516,6 @@ details p{max-width:76ch;margin:10px 0}
     c.fillStyle = '#E8DCC4';
     for (let i = 1; i < 8; i++){ if (i === 4) continue; const x = SX(TW*i/8); c.beginPath(); c.arc(x, SY(TH + RW*.55), 2.5, 0, 7); c.fill(); c.beginPath(); c.arc(x, SY(-RW*.55), 2.5, 0, 7); c.fill(); }
     for (let i = 1; i < 4; i++){ const y = SY(TH*i/4); c.beginPath(); c.arc(SX(-RW*.55), y, 2.5, 0, 7); c.fill(); c.beginPath(); c.arc(SX(TW + RW*.55), y, 2.5, 0, 7); c.fill(); }
-    // baş çizgisi ve noktalar
-    c.strokeStyle = 'rgba(255,255,255,.14)'; c.lineWidth = 1;
-    if (!isCarom()){ c.beginPath(); c.moveTo(SX(TW/4), SY(0)); c.lineTo(SX(TW/4), SY(TH)); c.stroke(); }
     // cepler
     c.fillStyle = '#0B0F12';
     for (const p of POCKETS){ c.beginPath(); c.arc(SX(p.x), SY(p.y), (p.r + 0.006)*s, 0, Math.PI*2); c.fill(); }

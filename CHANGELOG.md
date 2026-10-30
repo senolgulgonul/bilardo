@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.3 (2026-10-30 21:12 UTC)
+
+- Removed the head string line from the pool table for a cleaner look; on the break, the shaded area still shows where the cue ball can go
+
 ## v1.2 (2026-10-30 21:04 UTC)
 
 - Fix: Shoot did nothing in carom modes when the page loaded straight into carom (e.g. after a browser reload restored the mode menu)
