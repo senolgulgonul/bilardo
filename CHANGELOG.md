@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.1 (2026-10-30 20:50 UTC)
+
+- Fix: Shoot button stayed disabled after a finished game when switching mode or re-racking without a page refresh
+
 ## v1.0 (2026-10-30 20:30 UTC)
 
 First public release, by Şenol Gülgönül.
