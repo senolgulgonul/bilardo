@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physics billiards</title>
+<meta name="author" content="Şenol Gülgönül">
+<meta name="version" content="1.0 (build 2026-10-30 20:30 UTC)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E9EDEC; --panel:#F7F9F8; --ink:#17232B; --muted:#56636B; --rule:#CDD5D3;
+  --btn:#17232B; --btnText:#F7F9F8; --accent:#1F6B5C;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#12181D; --panel:#1A2228; --ink:#E3E9EC; --muted:#97A4AB; --rule:#2C3840;
+    --btn:#E3E9EC; --btnText:#12181D; --accent:#4FB39C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#12181D; --panel:#1A2228; --ink:#E3E9EC; --muted:#97A4AB; --rule:#2C3840;
+  --btn:#E3E9EC; --btnText:#12181D; --accent:#4FB39C; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
+main{max-width:1240px;margin:0 auto;padding:20px 16px 36px}
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px 24px;margin-bottom:14px}
+h1{font-size:clamp(1.6rem,3.2vw,2.3rem);line-height:1.1;margin:0;font-weight:700;letter-spacing:-.015em}
+.players{display:flex;gap:10px;flex-wrap:wrap}
+.player{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:8px 12px;min-width:190px}
+.player.active{border:2px solid var(--accent);padding:7px 11px}
+.player .name{font-weight:600}
+.player .grp{font-size:.85rem;color:var(--muted)}
+.tray{display:flex;gap:3px;margin-top:4px;min-height:14px;flex-wrap:wrap}
+.tray span{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.25)}
+.stage{background:var(--panel);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+#cv{display:block;width:100%;max-width:calc(66vh * 1.84);margin:0 auto;touch-action:none;cursor:crosshair}
+.shotbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--rule);flex-wrap:wrap}
+.shotbar .pw{flex:1;min-width:200px;display:flex;align-items:center;gap:10px}
+.shotbar .pw label{font-size:.92rem;white-space:nowrap}
+.shotbar output{font-variant-numeric:tabular-nums;font-weight:600;font-size:.9rem;white-space:nowrap;min-width:9.5em}
+.shotbar #shoot{width:auto;min-width:120px}
+.shotbar .fine{display:flex;gap:6px}
+.status{padding:10px 14px;border-top:1px solid var(--rule);font-weight:500;min-height:2.6em}
+.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--rule)}
+.readouts > div{padding:9px 14px;border-right:1px solid var(--rule)}
+.readouts > div:last-child{border-right:0}
+@media (max-width:620px){.readouts{grid-template-columns:repeat(2,minmax(0,1fr))}.readouts > div{border-bottom:1px solid var(--rule)}.readouts > div:nth-child(even){border-right:0}}
+.k{font-size:.8rem;color:var(--muted)}
+.v{font-size:1.1rem;font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.v small{font-size:.72rem;font-weight:500;color:var(--muted);margin-left:2px}
+.controls{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px;margin-top:16px}
+@media (max-width:900px){.controls{grid-template-columns:1fr 1fr}}
+@media (max-width:620px){.controls{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:16px}
+.panel h2{font-size:1rem;margin:0 0 12px;font-weight:600}
+.shot{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start}
+#spin{width:120px;height:120px;display:block;touch-action:none;cursor:pointer}
+.spinTxt{font-size:.82rem;color:var(--muted);text-align:center;margin-top:4px}
+.ctl{margin-bottom:12px}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:.92rem;margin-bottom:4px}
+.ctl output{font-variant-numeric:tabular-nums;font-weight:600}
+input[type=range]{width:100%;accent-color:var(--accent)}
+select{width:100%;font:inherit;padding:7px 8px;border-radius:8px;border:1px solid var(--rule);background:var(--paper);color:var(--ink)}
+button{font:inherit;font-weight:600;border-radius:8px;padding:9px 14px;cursor:pointer;border:1px solid var(--rule);background:transparent;color:var(--ink)}
+button:disabled{opacity:.45;cursor:default}
+#shoot{width:100%;background:var(--btn);color:var(--btnText);border-color:var(--btn);padding:12px;font-size:1.05rem}
+.row{display:flex;gap:8px;margin-bottom:12px}
+.row button{flex:1}
+button:focus-visible,input:focus-visible,select:focus-visible,canvas:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.checks{display:grid;gap:7px;font-size:.92rem;margin-top:4px}
+.checks label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.note{font-size:.85rem;color:var(--muted);margin:10px 0 0}
+details{margin-top:16px;background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:12px 16px}
+summary{cursor:pointer;font-weight:600}
+details p{max-width:76ch;margin:10px 0}
+.credits{margin-top:18px;font-size:.85rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <h1>Physics billiards</h1>
+    <div class="players" id="players"></div>
+  </div>
+
+  <section class="stage">
+    <canvas id="cv" tabindex="0" aria-label="Billiards table. Tap or drag on the table to aim."></canvas>
+    <div class="shotbar">
+      <div class="pw"><label for="power">Power</label>
+        <input type="range" id="power" min="3" max="100" step="1" value="45"><output id="oPow"></output></div>
+      <div class="fine"><button id="aimL" aria-label="Rotate aim left">↺ 0.2°</button><button id="aimR" aria-label="Rotate aim right">↻ 0.2°</button></div>
+      <button id="shoot">Shoot</button>
+    </div>
+    <div class="status" id="status" aria-live="polite"></div>
+    <div class="readouts">
+      <div><div class="k">Cue ball speed</div><div class="v" id="rV">0.00<small>m/s</small></div></div>
+      <div><div class="k">Motion state</div><div class="v" id="rS">at rest</div></div>
+      <div><div class="k">Topspin ÷ rolling spin</div><div class="v" id="rW">—</div></div>
+      <div><div class="k">Sidespin ωz</div><div class="v" id="rZ">0<small>rad/s</small></div></div>
+    </div>
+  </section>
+
+  <div class="controls">
+    <div class="panel">
+      <h2>Spin and contact point</h2>
+      <div class="shot">
+        <div>
+          <canvas id="spin" aria-label="Where the cue tip strikes the ball. Click to set follow, draw and side spin."></canvas>
+          <div class="spinTxt" id="spinTxt">center hit</div>
+        </div>
+        <p class="note" style="margin:0">The red dot is where the cue tip hits the ball. Hit high for follow, low for draw, off-center for side spin (english). The dashed ring is the miscue limit.<br><br>Tap or drag on the table to aim. Arrow keys fine-tune, space shoots.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Game</h2>
+      <div class="ctl"><label for="mode">Mode</label>
+        <select id="mode">
+          <option value="8ball" selected>8-ball, two players</option>
+          <option value="free">Free practice (pool)</option>
+          <option value="carom">Carom, straight rail</option>
+          <option value="three">Carom, three-cushion</option>
+        </select></div>
+      <div class="row"><button id="rerack">Re-rack</button><button id="slowBtn" aria-pressed="false">Slow motion</button></div>
+      <div class="checks">
+        <label><input type="checkbox" id="showGuide" checked> Aiming guide (ghost ball, 90° line)</label>
+        <label><input type="checkbox" id="showPath" checked> Show predicted path</label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Physics settings</h2>
+      <div class="ctl"><label for="muS">Sliding friction μ <output id="oMuS"></output></label>
+        <input type="range" id="muS" min="0.05" max="0.35" step="0.01" value="0.2"></div>
+      <div class="ctl"><label for="muR">Rolling resistance <output id="oMuR"></output></label>
+        <input type="range" id="muR" min="0.002" max="0.03" step="0.001" value="0.01"></div>
+      <div class="ctl"><label for="eC">Cushion restitution <output id="oEC"></output></label>
+        <input type="range" id="eC" min="0.4" max="0.95" step="0.01" value="0.75"></div>
+      <div class="ctl"><label for="eB">Ball–ball restitution <output id="oEB"></output></label>
+        <input type="range" id="eB" min="0.8" max="1" step="0.01" value="0.95"></div>
+    </div>
+  </div>
+
+  <details>
+    <summary>What’s in the model?</summary>
+    <p>Pool table 9 ft (2.54 m × 1.27 m), balls 57.2 mm. A center-ball hit makes the ball slide first. Cloth friction reduces the slip speed at a rate of 7/2·μg while spinning the ball up; once slipping stops the ball rolls, at exactly 5/7 of its initial speed.</p>
+    <p>Hitting high gives topspin (follow), hitting low gives backspin (draw). On a full hit the cue ball hands over most of its forward speed but keeps its spin; friction turns that spin back into motion, so the ball follows forward or draws back. None of this is scripted: it falls out of the physics.</p>
+    <p>With equal masses, a stun (sliding) hit sends the two balls off at 90° to each other. Side spin changes the rebound angle off a cushion, because cushion friction couples the sidespin with the tangential speed.</p>
+    <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
+    <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
+  </details>
+  <footer class="credits">Physics Billiards v1.0, build 2026-10-30 20:30 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+</main>
+
+<script>
+(function(){
+  const $ = id => document.getElementById(id);
+  /* ---------- sabitler ---------- */
+  let TW = 2.54, TH = 1.27, R = 0.028575;
+  const RW = 0.12, G = 9.81, MAXV = 7.5, TARGET = {carom:10, three:5};
+  const MC = 0.075, MM = 0.055;
+  const POOL_POCKETS = [
+    {x:-0.006,y:-0.006,r:0.06},{x:TW/2,y:-0.012,r:0.05},{x:TW+0.006,y:-0.006,r:0.06},
+    {x:-0.006,y:TH+0.006,r:0.06},{x:TW/2,y:TH+0.012,r:0.05},{x:TW+0.006,y:TH+0.006,r:0.06}];
+  let POCKETS = POOL_POCKETS;
+  const isCarom = () => GM.mode === 'carom' || GM.mode === 'three';
+  function setTable(carom){
+    if (carom){ TW = 2.84; TH = 1.42; R = 0.03075; POCKETS = []; }
+    else { TW = 2.54; TH = 1.27; R = 0.028575; POCKETS = POOL_POCKETS; }
+  }
+  const COL = {0:'#F4F1E8',1:'#F2C230',2:'#1D4ED8',3:'#C62828',4:'#6B21A8',5:'#EA6A0A',6:'#15803D',7:'#7F1D1D',8:'#16181A'};
+  const colorOf = n => n === 20 ? '#F2C230' : n === 21 ? '#C62828' : n > 8 ? COL[n-8] : COL[n];
+  const typeOf = n => n === 0 ? 'cue' : n === 8 ? 'eight' : n < 8 ? 'solid' : 'stripe';
+  const GROUPNAME = {solid:'Solids (1–7)', stripe:'Stripes (9–15)'};
+  const fmt = (n, d) => { const t = n.toFixed(d); return /^-0\.?0*$/.test(t) ? t.slice(1) : t; };
+
+  const PH = {};
+  function readPhys(){
+    PH.muS = +$('muS').value; PH.muR = +$('muR').value; PH.eC = +$('eC').value; PH.eB = +$('eB').value;
+    $('oMuS').textContent = PH.muS.toFixed(2); $('oMuR').textContent = PH.muR.toFixed(3);
+    $('oEC').textContent = PH.eC.toFixed(2); $('oEB').textContent = PH.eB.toFixed(2);
+  }
+
+  /* ---------- durum ---------- */
+  let balls = [], cue = null, aimA = 0, spinX = 0, spinY = 0, slow = false;
+  let moving = false, shot = null, trail = [], trailT = 0;
+  const GM = {};
+
+  function makeBall(n, x, y){ return {n, x, y, vx:0, vy:0, wx:0, wy:0, wz:0, on:true, state:'stop'}; }
+  function rack(){
+    balls = []; shot = null;
+    GM.mode = $('mode').value; setTable(isCarom()); fit();
+    if (isCarom()){
+      const white = makeBall(0, TW/4, TH/2 - 0.1525), yellow = makeBall(20, TW/4, TH/2), red = makeBall(21, TW*3/4, TH/2);
+      balls = [white, yellow, red]; cue = white;
+      GM.turn = 0; GM.scores = [0, 0]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false;
+      aimA = Math.atan2(red.y - white.y, red.x - white.x); moving = false; trail = [];
+      setStatus((GM.mode === 'three' ? 'Three-cushion' : 'Carom') + ': Player 1 plays white, Player 2 yellow. To score, your ball must hit both other balls' +
+        (GM.mode === 'three' ? ', touching at least 3 cushions before the second one.' : '.') + ' First to ' + TARGET[GM.mode] + ' wins.');
+      renderPlayers(); return;
+    }
+    cue = makeBall(0, TW/4, TH/2); balls.push(cue);
+    const rows = [[1],[9,2],[10,8,3],[11,7,14,4],[5,13,15,6,12]];
+    const fx = TW*3/4, dx = 2*R*Math.cos(Math.PI/6)*1.002, dy = 2*R*1.002;
+    rows.forEach((row, i) => row.forEach((n, j) => balls.push(makeBall(n, fx + i*dx, TH/2 + (j - i/2)*dy))));
+    GM.turn = 0; GM.groups = [null, null]; GM.over = false;
+    GM.isBreak = true; GM.inHand = true; GM.kitchen = true;
+    aimA = 0; moving = false; trail = [];
+    setStatus(GM.mode === 'free' ? 'Free practice. Drag the cue ball anywhere and shoot as you like.'
+      : 'Break: Player 1. You can drag the cue ball anywhere behind the head string.');
+    renderPlayers();
+  }
+
+  /* ---------- fizik ---------- */
+  function stepBall(b, dt){
+    const ux = b.vx - R*b.wy, uy = b.vy + R*b.wx, un = Math.hypot(ux, uy);
+    if (un > 3.5*PH.muS*G*dt){
+      const kx = ux/un, ky = uy/un, a = PH.muS*G*dt, k = 5*PH.muS*G/(2*R)*dt;
+      b.vx -= a*kx; b.vy -= a*ky; b.wx -= k*ky; b.wy += k*kx;
+      b.state = 'slide';
+    } else {
+      const sp = Math.hypot(b.vx, b.vy), d = PH.muR*G*dt;
+      if (sp > d){ b.vx -= d*b.vx/sp; b.vy -= d*b.vy/sp; b.state = 'roll'; }
+      else { b.vx = 0; b.vy = 0; b.state = 'stop'; }
+      b.wy = b.vx/R; b.wx = -b.vy/R;
+    }
+    const dz = 6*dt;
+    b.wz = Math.abs(b.wz) <= dz ? 0 : b.wz - Math.sign(b.wz)*dz;
+    b.x += b.vx*dt; b.y += b.vy*dt;
+  }
+
+  function cushion(b, nx, ny){
+    const vn = b.vx*nx + b.vy*ny;
+    if (vn >= 0) return;
+    if (shot && b === shot.cueBall) shot.cush++;
+    const tx = -ny, ty = nx, vt = b.vx*tx + b.vy*ty;
+    const slip = vt - b.wz*R, dvt = -slip*(2/7)*0.6, nvn = -PH.eC*vn;
+    b.vx = nvn*nx + (vt + dvt)*tx; b.vy = nvn*ny + (vt + dvt)*ty;
+    b.wz -= 5*dvt/(2*R);
+  }
+
+  function rails(b){
+    const pk = POCKETS.length > 0, cX = pk && (b.x < MC || b.x > TW - MC), cY = pk && (b.y < MC || b.y > TH - MC), mid = pk && Math.abs(b.x - TW/2) < MM;
+    if (b.x < R && !cY){ b.x = R; cushion(b, 1, 0); }
+    if (b.x > TW - R && !cY){ b.x = TW - R; cushion(b, -1, 0); }
+    if (b.y < R && !cX && !mid){ b.y = R; cushion(b, 0, 1); }
+    if (b.y > TH - R && !cX && !mid){ b.y = TH - R; cushion(b, 0, -1); }
+  }
+
+  function pockets(b){
+    let pot = b.x < -1.5*R || b.x > TW + 1.5*R || b.y < -1.5*R || b.y > TH + 1.5*R;
+    if (!pot) for (const p of POCKETS) if (Math.hypot(b.x - p.x, b.y - p.y) < p.r){ pot = true; break; }
+    if (pot){ b.on = false; b.vx = b.vy = b.wx = b.wy = b.wz = 0; b.state = 'stop'; if (shot) shot.potted.push(b.n); }
+  }
+
+  function collide(){
+    for (let i = 0; i < balls.length; i++){
+      const a = balls[i]; if (!a.on) continue;
+      for (let j = i+1; j < balls.length; j++){
+        const b = balls[j]; if (!b.on) continue;
+        const dx = b.x - a.x, dy = b.y - a.y;
+        if (Math.abs(dx) > 2*R || Math.abs(dy) > 2*R) continue;
+        const d = Math.hypot(dx, dy); if (d >= 2*R || d < 1e-12) continue;
+        const nx = dx/d, ny = dy/d, ov = (2*R - d)/2;
+        a.x -= nx*ov; a.y -= ny*ov; b.x += nx*ov; b.y += ny*ov;
+        const rel = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny;
+        if (rel < 0){
+          const J = -(1 + PH.eB)/2*rel;
+          a.vx -= J*nx; a.vy -= J*ny; b.vx += J*nx; b.vy += J*ny;
+          const cb = shot && shot.cueBall;
+          if (cb && (a === cb || b === cb)){
+            const o = a === cb ? b : a;
+            if (shot.first === null) shot.first = o.n;
+            if (!shot.hits.some(h => h.n === o.n)) shot.hits.push({n:o.n, cush:shot.cush});
+          }
+        }
+      }
+    }
+  }
+
+  function step(dt){
+    for (const b of balls) if (b.on) stepBall(b, dt);
+    for (const b of balls) if (b.on){ rails(b); pockets(b); }
+    collide();
+    trailT += dt;
+    if (cue.on && trailT >= 0.008){ trailT = 0; trail.push([cue.x, cue.y]); }
+  }
+
+  function allStopped(){
+    return balls.every(b => !b.on || (b.vx === 0 && b.vy === 0 && Math.hypot(b.vx - R*b.wy, b.vy + R*b.wx) < 1e-9));
+  }
+
+  /* ---------- atış ve kurallar ---------- */
+  function groupCleared(g){ return balls.every(b => typeOf(b.n) !== g || !b.on); }
+
+  function shoot(){
+    if (moving || GM.over || !cue.on) return;
+    const pw = +$('power').value/100, v0 = 0.15 + pw*(MAXV - 0.15);
+    const dx = Math.cos(aimA), dy = Math.sin(aimA);
+    const Om = 5*v0*spinY/(2*R);
+    cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
+    const g = GM.groups[GM.turn];
+    shot = {first:null, potted:[], hits:[], cush:0, cueBall:cue, clearedBefore: !isCarom() && !!g && groupCleared(g)};
+    acc = 0; moving = true; GM.inHand = false; trail = [[cue.x, cue.y]];
+    setStatus('Balls in motion…');
+    updateButtons();
+  }
+
+  function freeSpot(x, y, dirx){
+    let px = x;
+    for (let k = 0; k < 200; k++){
+      if (balls.every(b => !b.on || Math.hypot(b.x - px, b.y - y) >= 2*R + 0.001)) return px;
+      px += dirx*0.01;
+    }
+    return x;
+  }
+  function respawnCue(){ cue.on = true; cue.vx = cue.vy = cue.wx = cue.wy = cue.wz = 0; cue.y = TH/2; cue.x = freeSpot(TW/4, TH/2, -1); }
+
+  function endShot(){
+    moving = false;
+    for (const b of balls) b.wz = 0;
+    if (isCarom()){
+      const s = shot, me = GM.turn, two = s.hits.length >= 2;
+      const ok = two && (GM.mode === 'carom' || s.hits[1].cush >= 3);
+      const name = n => n === 0 ? 'white' : n === 20 ? 'yellow' : 'red';
+      if (ok){
+        GM.scores[me]++;
+        if (GM.scores[me] >= TARGET[GM.mode]){ GM.over = true; setStatus('Player ' + (me+1) + ' wins with ' + GM.scores[me] + ' points!'); }
+        else setStatus('Point! ' + (GM.mode === 'three' ? 'Reached the second ball after ' + s.hits[1].cush + ' cushions. ' : '') + 'Player ' + (me+1) + ' continues.');
+      } else {
+        let why = !s.hits.length ? 'missed both balls' : !two ? 'only hit the ' + name(s.hits[0].n) + ' ball'
+          : 'reached the second ball after ' + s.hits[1].cush + ' cushions, 3 needed';
+        GM.turn = 1 - me; cue = balls.find(b => b.n === (allWhite() || GM.turn === 0 ? 0 : 20));
+        setStatus('No point: ' + why + '. Player ' + (GM.turn+1) + '’s turn (' + (allWhite() || GM.turn === 0 ? 'white' : 'yellow') + ' ball).');
+      }
+      trail = []; renderPlayers(); updateButtons(); return;
+    }
+    const s = shot, P = 'Player ' + (GM.turn + 1), scratch = s.potted.includes(0);
+    if (scratch) respawnCue();
+
+    if (GM.mode === 'free'){
+      GM.inHand = scratch; GM.kitchen = false;
+      setStatus(scratch ? 'Scratch. Drag the cue ball to place it again.' :
+        s.potted.length ? 'Potted: ' + s.potted.join(', ') + '.' : 'Shot over.');
+      GM.isBreak = false; renderPlayers(); updateButtons(); return;
+    }
+
+    const me = GM.turn, my = GM.groups[me];
+    const obj = s.potted.filter(n => n !== 0 && n !== 8);
+    let foul = null;
+    if (scratch) foul = 'scratch';
+    else if (s.first === null) foul = 'cue ball hit nothing';
+    else if (!GM.isBreak){
+      if (!my && s.first === 8) foul = 'first contact was the 8-ball';
+      else if (my && s.clearedBefore && s.first !== 8) foul = 'you had to hit the 8-ball first';
+      else if (my && !s.clearedBefore && typeOf(s.first) !== my) foul = 'first contact was an opponent’s ball';
+    }
+
+    if (s.potted.includes(8)){
+      if (GM.isBreak){
+        const b8 = balls.find(b => b.n === 8);
+        b8.on = true; b8.vx = b8.vy = b8.wx = b8.wy = 0; b8.y = TH/2; b8.x = freeSpot(TW*3/4, TH/2, 1);
+      } else {
+        GM.over = true;
+        const win = s.clearedBefore && !foul ? me : 1 - me;
+        setStatus('Player ' + (win + 1) + ' wins! ' + (win === me ? 'The 8-ball went in legally.' :
+          'The 8-ball was potted ' + (foul ? 'on a foul.' : 'too early.')));
+        renderPlayers(); updateButtons(); return;
+      }
+    }
+
+    if (!my && !GM.isBreak && !foul && obj.length){
+      const t = typeOf(obj[0]); GM.groups[me] = t; GM.groups[1-me] = t === 'solid' ? 'stripe' : 'solid';
+    }
+    const g = GM.groups[me];
+    const keep = !foul && (g ? obj.some(n => typeOf(n) === g) : obj.length > 0);
+    GM.isBreak = false;
+
+    if (foul){
+      GM.turn = 1 - me; GM.inHand = true; GM.kitchen = false;
+      setStatus('Foul: ' + foul + '. Player ' + (GM.turn + 1) + ' has ball in hand.');
+    } else if (keep){
+      setStatus(P + ' continues' + (obj.length ? ' (potted: ' + obj.join(', ') + ')' : '') + '.');
+    } else {
+      GM.turn = 1 - me;
+      setStatus('Player ' + (GM.turn + 1) + '’s turn.');
+    }
+    renderPlayers(); updateButtons();
+  }
+
+  function renderPlayers(){
+    const box = $('players'); box.innerHTML = '';
+    if (isCarom()){
+      for (let i = 0; i < 2; i++){
+        const d = document.createElement('div');
+        d.className = 'player' + (GM.turn === i && !GM.over ? ' active' : '');
+        d.innerHTML = '<div class="name">Player ' + (i+1) + (GM.turn === i && !GM.over ? ' ●' : '') + '</div><div class="grp">' +
+          (allWhite() || i === 0 ? 'White ball' : 'Yellow ball') + ', race to ' + TARGET[GM.mode] + '</div><div class="v">' + GM.scores[i] + '</div>';
+        box.appendChild(d);
+      }
+      return;
+    }
+    const n = GM.mode === 'free' ? 0 : 2;
+    for (let i = 0; i < n; i++){
+      const g = GM.groups[i], d = document.createElement('div');
+      d.className = 'player' + (GM.turn === i && !GM.over ? ' active' : '');
+      let grp = g ? GROUPNAME[g] : 'Table open';
+      if (g && groupCleared(g)) grp = 'On the 8-ball';
+      let tray = '';
+      if (g) balls.filter(b => typeOf(b.n) === g && !b.on).forEach(b =>
+        tray += '<span title="' + b.n + '" style="background:' + (b.n > 8 ? 'linear-gradient(#fff 28%,' + colorOf(b.n) + ' 28% 72%,#fff 72%)' : colorOf(b.n)) + '"></span>');
+      d.innerHTML = '<div class="name">Player ' + (i+1) + (GM.turn === i && !GM.over ? ' ●' : '') + '</div><div class="grp">' + grp + '</div><div class="tray">' + tray + '</div>';
+      box.appendChild(d);
+    }
+  }
+
+  function setStatus(t){ $('status').textContent = t; }
+  function updateButtons(){ const dis = moving || GM.over; $('shoot').disabled = dis; $('aimL').disabled = dis; $('aimR').disabled = dis; }
+
+  /* ---------- çizim ---------- */
+  const cv = $('cv'), ctx = cv.getContext('2d');
+  let W = 0, H = 0, s = 1;
+  function fit(){
+    const dpr = window.devicePixelRatio || 1;
+    W = cv.getBoundingClientRect().width; s = W/(TW + 2*RW); H = (TH + 2*RW)*s;
+    cv.style.height = H + 'px'; cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  const SX = x => (x + RW)*s, SY = y => (TH - y + RW)*s;
+
+  function castAim(){
+    const dx = Math.cos(aimA), dy = Math.sin(aimA);
+    let best = Infinity, hit = null;
+    for (const b of balls){
+      if (!b.on || b === cue) continue;
+      const fx = cue.x - b.x, fy = cue.y - b.y, B = fx*dx + fy*dy, C = fx*fx + fy*fy - 4*R*R, disc = B*B - C;
+      if (disc >= 0){ const t = -B - Math.sqrt(disc); if (t > 0 && t < best){ best = t; hit = b; } }
+    }
+    const tx = dx > 0 ? (TW - R - cue.x)/dx : dx < 0 ? (R - cue.x)/dx : Infinity;
+    const ty = dy > 0 ? (TH - R - cue.y)/dy : dy < 0 ? (R - cue.y)/dy : Infinity;
+    const tr = Math.min(tx, ty);
+    if (tr < best) return {rail:true, t:tr, vertical: tx < ty, dx, dy};
+    return {ball:hit, t:best, dx, dy};
+  }
+
+  function drawBall(b){
+    const x = SX(b.x), y = SY(b.y), r = R*s;
+    const c = ctx;
+    c.save();
+    c.beginPath(); c.arc(x, y, r, 0, Math.PI*2); c.clip();
+    if (b.n > 8 && b.n < 16){
+      c.fillStyle = '#F4F1E8'; c.fillRect(x - r, y - r, 2*r, 2*r);
+      c.fillStyle = colorOf(b.n); c.fillRect(x - r, y - r*0.55, 2*r, r*1.1);
+    } else { c.fillStyle = colorOf(b.n); c.fillRect(x - r, y - r, 2*r, 2*r); }
+    const sh = c.createRadialGradient(x - r*.35, y - r*.4, r*.1, x, y, r*1.05);
+    sh.addColorStop(0, 'rgba(255,255,255,.55)'); sh.addColorStop(.35, 'rgba(255,255,255,0)'); sh.addColorStop(1, 'rgba(0,0,0,.35)');
+    c.fillStyle = sh; c.fillRect(x - r, y - r, 2*r, 2*r);
+    c.restore();
+    if (b.n > 0 && b.n < 16 && r >= 7){
+      c.fillStyle = '#F4F1E8'; c.beginPath(); c.arc(x, y, r*.48, 0, Math.PI*2); c.fill();
+      c.fillStyle = '#16181A'; c.font = '700 ' + Math.round(r*.62) + 'px Archivo, system-ui, sans-serif';
+      c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(String(b.n), x, y + r*.04);
+    }
+  }
+
+  let pred = null, predKey = '';
+  function predict(){
+    const key = [aimA, $('power').value, spinX, spinY, cue.x, cue.y, PH.muS, PH.muR, PH.eC, PH.eB, GM.mode,
+      balls.map(b => b.on ? Math.round(b.x*1e4) + ',' + Math.round(b.y*1e4) : '-').join(';')].join('|');
+    if (key === predKey) return pred;
+    predKey = key;
+    const sB = balls, sC = cue, sS = shot, sT = trail, sTT = trailT;
+    balls = sB.map(b => Object.assign({}, b)); cue = balls[sB.indexOf(sC)];
+    trail = []; trailT = 0;
+    const pw = +$('power').value/100, v0 = 0.15 + pw*(MAXV - 0.15), dx = Math.cos(aimA), dy = Math.sin(aimA), Om = 5*v0*spinY/(2*R);
+    cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
+    shot = {first:null, potted:[], hits:[], cush:0, cueBall:cue};
+    const path = [[cue.x, cue.y]], marks = [], opath = []; let nh = 0, nc = 0, ob = null, obDone = false, cueDone = false;
+    for (let i = 1; i <= 9000; i++){
+      step(0.001);
+      if (shot.hits.length > nh){ nh = shot.hits.length; marks.push({x:cue.x, y:cue.y, k:'hit'}); }
+      if (shot.cush > nc){ nc = shot.cush; marks.push({x:cue.x, y:cue.y, k:'cush', n:nc}); }
+      if (!cueDone && (i % 5 === 0 || !cue.on)){ path.push([cue.x, cue.y]); if (!cue.on) cueDone = true; }
+      if (!ob && shot.first !== null){ ob = balls.find(b => b.n === shot.first); opath.push([ob.x, ob.y]); }
+      if (ob && !obDone && (i % 5 === 0 || !ob.on)){ opath.push([ob.x, ob.y]); if (!ob.on) obDone = true; }
+      if (i % 20 === 0 && allStopped()) break;
+    }
+    const h = shot.hits;
+    pred = {path, marks, score: isCarom() && h.length >= 2 && (GM.mode === 'carom' || h[1].cush >= 3),
+      obj: !isCarom() && opath.length > 1 ? {path: opath, potted: !ob.on} : null, scratch: !isCarom() && !cue.on};
+    balls = sB; cue = sC; shot = sS; trail = sT; trailT = sTT;
+    return pred;
+  }
+
+  function draw(){
+    const c = ctx;
+    c.clearRect(0, 0, W, H);
+    // ahşap kenar
+    c.fillStyle = '#4A2F1E'; c.beginPath();
+    if (c.roundRect) c.roundRect(0, 0, W, H, 14); else c.rect(0, 0, W, H);
+    c.fill();
+    // bant
+    c.fillStyle = isCarom() ? '#1B4A70' : '#17594C'; c.fillRect(SX(-0.035), SY(TH + 0.035), (TW + 0.07)*s, (TH + 0.07)*s);
+    // kumaş
+    const fg = c.createRadialGradient(SX(TW/2), SY(TH/2), 10, SX(TW/2), SY(TH/2), TW*s*.6);
+    if (isCarom()){ fg.addColorStop(0, '#2C6FA3'); fg.addColorStop(1, '#215A88'); } else { fg.addColorStop(0, '#2A8270'); fg.addColorStop(1, '#1F6B5C'); }
+    c.fillStyle = fg; c.fillRect(SX(0), SY(TH), TW*s, TH*s);
+    // elmaslar
+    c.fillStyle = '#E8DCC4';
+    for (let i = 1; i < 8; i++){ if (i === 4) continue; const x = SX(TW*i/8); c.beginPath(); c.arc(x, SY(TH + RW*.55), 2.5, 0, 7); c.fill(); c.beginPath(); c.arc(x, SY(-RW*.55), 2.5, 0, 7); c.fill(); }
+    for (let i = 1; i < 4; i++){ const y = SY(TH*i/4); c.beginPath(); c.arc(SX(-RW*.55), y, 2.5, 0, 7); c.fill(); c.beginPath(); c.arc(SX(TW + RW*.55), y, 2.5, 0, 7); c.fill(); }
+    // baş çizgisi ve noktalar
+    c.strokeStyle = 'rgba(255,255,255,.14)'; c.lineWidth = 1;
+    if (!isCarom()){ c.beginPath(); c.moveTo(SX(TW/4), SY(0)); c.lineTo(SX(TW/4), SY(TH)); c.stroke(); }
+    // cepler
+    c.fillStyle = '#0B0F12';
+    for (const p of POCKETS){ c.beginPath(); c.arc(SX(p.x), SY(p.y), (p.r + 0.006)*s, 0, Math.PI*2); c.fill(); }
+
+    // beyaz izi
+    if (false && trail.length > 1){
+      c.strokeStyle = 'rgba(255,255,255,.45)'; c.lineWidth = 1.5; c.setLineDash([2,4]);
+      c.beginPath(); c.moveTo(SX(trail[0][0]), SY(trail[0][1]));
+      for (const [x, y] of trail) c.lineTo(SX(x), SY(y));
+      c.stroke(); c.setLineDash([]);
+    }
+
+    const idle = !moving && !GM.over && cue.on;
+    // nişan kılavuzu
+    if (idle && $('showGuide').checked){
+      const A = castAim();
+      const gx = cue.x + A.dx*A.t, gy = cue.y + A.dy*A.t;
+      c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5;
+      c.beginPath(); c.moveTo(SX(cue.x), SY(cue.y)); c.lineTo(SX(gx), SY(gy)); c.stroke();
+      c.beginPath(); c.arc(SX(gx), SY(gy), R*s, 0, Math.PI*2); c.stroke();
+      if (A.ball){
+        const nx = (A.ball.x - gx)/(2*R), ny = (A.ball.y - gy)/(2*R);
+        c.strokeStyle = 'rgba(255,236,170,.9)'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(SX(A.ball.x), SY(A.ball.y)); c.lineTo(SX(A.ball.x + nx*0.45), SY(A.ball.y + ny*0.45)); c.stroke();
+        let tx = A.dx - (A.dx*nx + A.dy*ny)*nx, ty = A.dy - (A.dx*nx + A.dy*ny)*ny; const tl = Math.hypot(tx, ty);
+        if (tl > 0.02 && !$('showPath').checked){
+          tx /= tl; ty /= tl;
+          c.strokeStyle = 'rgba(255,255,255,.55)'; c.setLineDash([5,5]); c.lineWidth = 1.5;
+          c.beginPath(); c.moveTo(SX(gx), SY(gy)); c.lineTo(SX(gx + tx*0.3), SY(gy + ty*0.3)); c.stroke(); c.setLineDash([]);
+          c.fillStyle = 'rgba(255,255,255,.75)'; c.font = '600 11px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText('90°', SX(gx + tx*0.34), SY(gy + ty*0.34));
+        }
+      } else {
+        const rx = A.vertical ? -A.dx : A.dx, ry = A.vertical ? A.dy : -A.dy;
+        c.strokeStyle = 'rgba(255,255,255,.4)'; c.setLineDash([5,5]);
+        c.beginPath(); c.moveTo(SX(gx), SY(gy)); c.lineTo(SX(gx + rx*0.3), SY(gy + ry*0.3)); c.stroke(); c.setLineDash([]);
+      }
+    }
+
+    if (idle && $('showPath').checked){
+      const p = predict();
+      c.strokeStyle = p.score ? 'rgba(134,239,172,.95)' : 'rgba(255,255,255,.6)';
+      c.lineWidth = 2; c.lineJoin = 'round';
+      c.beginPath(); c.moveTo(SX(p.path[0][0]), SY(p.path[0][1]));
+      for (const [x, y] of p.path) c.lineTo(SX(x), SY(y));
+      c.stroke();
+      for (const m of p.marks){
+        if (m.k === 'hit'){
+          c.strokeStyle = 'rgba(255,236,170,.95)'; c.lineWidth = 1.5;
+          c.beginPath(); c.arc(SX(m.x), SY(m.y), R*s, 0, Math.PI*2); c.stroke();
+        } else if (GM.mode === 'three'){
+          c.fillStyle = 'rgba(0,0,0,.55)'; c.beginPath(); c.arc(SX(m.x), SY(m.y), 8, 0, Math.PI*2); c.fill();
+          c.fillStyle = '#fff'; c.font = '600 11px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillText(String(m.n), SX(m.x), SY(m.y) + .5);
+        }
+      }
+      if (p.score){
+        const [ex, ey] = p.path[p.path.length - 1];
+        c.font = '700 13px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'bottom';
+        c.fillStyle = 'rgba(134,239,172,1)'; c.fillText('point ✓', SX(ex), SY(ey) - R*s - 4);
+      }
+      if (p.obj){
+        c.strokeStyle = p.obj.potted ? 'rgba(134,239,172,.95)' : 'rgba(255,236,170,.85)'; c.lineWidth = 2;
+        c.beginPath(); c.moveTo(SX(p.obj.path[0][0]), SY(p.obj.path[0][1]));
+        for (const [x, y] of p.obj.path) c.lineTo(SX(x), SY(y));
+        c.stroke();
+        if (p.obj.potted){
+          const [ex, ey] = p.obj.path[p.obj.path.length - 1];
+          c.font = '700 13px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.fillStyle = 'rgba(134,239,172,1)'; c.fillText('in ✓', SX(Math.min(Math.max(ex, 0.12), TW - 0.12)), SY(Math.min(Math.max(ey, 0.1), TH - 0.1)));
+        }
+      }
+      if (p.scratch){
+        const [ex, ey] = p.path[p.path.length - 1];
+        c.font = '700 13px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        c.fillStyle = '#FCA5A5'; c.fillText('scratch!', SX(Math.min(Math.max(ex, 0.15), TW - 0.15)), SY(Math.min(Math.max(ey, 0.12), TH - 0.12)));
+      }
+    }
+    for (const b of balls) if (b.on) drawBall(b);
+
+    if (GM.inHand && idle){
+      c.strokeStyle = 'rgba(255,255,255,.8)'; c.setLineDash([3,3]); c.lineWidth = 1.5;
+      c.beginPath(); c.arc(SX(cue.x), SY(cue.y), R*s + 5, 0, Math.PI*2); c.stroke(); c.setLineDash([]);
+      if (GM.kitchen){ c.fillStyle = 'rgba(255,255,255,.05)'; c.fillRect(SX(0), SY(TH), TW/4*s, TH*s); }
+    }
+
+    // ıstaka
+    if (idle){
+      const dx = Math.cos(aimA), dy = Math.sin(aimA), pw = +$('power').value/100;
+      const g0 = R + 0.012 + pw*0.14, L = 1.45;
+      const ax = SX(cue.x - dx*g0), ay = SY(cue.y - dy*g0), bx = SX(cue.x - dx*(g0 + L)), by = SY(cue.y - dy*(g0 + L));
+      const mx = SX(cue.x - dx*(g0 + L*.62)), my = SY(cue.y - dy*(g0 + L*.62));
+      c.lineCap = 'round';
+      c.strokeStyle = '#D9B98A'; c.lineWidth = Math.max(3, 0.012*s); c.beginPath(); c.moveTo(ax, ay); c.lineTo(mx, my); c.stroke();
+      c.strokeStyle = '#2B1A10'; c.lineWidth = Math.max(4, 0.02*s); c.beginPath(); c.moveTo(mx, my); c.lineTo(bx, by); c.stroke();
+      c.strokeStyle = '#7FB0D0'; c.lineWidth = Math.max(3, 0.012*s); c.beginPath(); c.moveTo(ax, ay); c.lineTo(SX(cue.x - dx*(g0 + 0.015)), SY(cue.y - dy*(g0 + 0.015))); c.stroke();
+      c.lineCap = 'butt';
+    }
+
+    if (GM.mode === 'three' && shot && (moving || shot.cush)){
+      c.font = '600 14px Archivo, system-ui, sans-serif'; c.textAlign = 'left'; c.textBaseline = 'top';
+      const t = 'Cushions: ' + shot.cush + (shot.hits.length ? '   Balls hit: ' + shot.hits.length : '');
+      c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(SX(0) + 8, SY(TH) + 8, c.measureText(t).width + 14, 24);
+      c.fillStyle = '#fff'; c.fillText(t, SX(0) + 15, SY(TH) + 13);
+    }
+    if (false){
+      const lbl = cue.state === 'slide' ? 'sliding' : 'rolling';
+      c.font = '600 12px Archivo, system-ui, sans-serif'; c.textAlign = 'left'; c.textBaseline = 'middle';
+      const w = c.measureText(lbl).width + 10, x = SX(cue.x) + R*s + 6, y = SY(cue.y) - R*s - 6;
+      c.fillStyle = cue.state === 'slide' ? 'rgba(234,106,10,.9)' : 'rgba(23,35,43,.8)';
+      c.fillRect(x, y - 9, w, 18); c.fillStyle = '#fff'; c.fillText(lbl, x + 5, y);
+    }
+  }
+
+  function readouts(){
+    const sp = Math.hypot(cue.vx, cue.vy);
+    $('rV').innerHTML = fmt(sp, 2) + '<small>m/s</small>';
+    $('rS').textContent = !cue.on ? 'pocketed' : cue.state === 'slide' ? 'sliding' : cue.state === 'roll' ? 'rolling' : 'at rest';
+    if (sp > 0.02){
+      const ax = -cue.vy/sp, ay = cue.vx/sp, wAlong = cue.wx*ax + cue.wy*ay;
+      $('rW').textContent = fmt(wAlong*R/sp, 2) + (wAlong < -0.01 ? ' (back)' : '');
+    } else $('rW').textContent = '—';
+    $('rZ').innerHTML = fmt(cue.wz, 0) + '<small>rad/s</small>';
+  }
+
+  /* ---------- falso seçici ---------- */
+  const sc = $('spin'), sctx = sc.getContext('2d');
+  function drawSpin(){
+    const dpr = window.devicePixelRatio || 1, S = 120;
+    sc.width = S*dpr; sc.height = S*dpr; sctx.setTransform(dpr,0,0,dpr,0,0);
+    const cx = 60, cy = 60, r = 52;
+    const gr = sctx.createRadialGradient(cx - 15, cy - 18, 5, cx, cy, r);
+    gr.addColorStop(0, '#FFFFFF'); gr.addColorStop(1, '#C9C6BC');
+    sctx.fillStyle = gr; sctx.beginPath(); sctx.arc(cx, cy, r, 0, 7); sctx.fill();
+    sctx.strokeStyle = 'rgba(0,0,0,.18)'; sctx.lineWidth = 1;
+    sctx.beginPath(); sctx.moveTo(cx - r, cy); sctx.lineTo(cx + r, cy); sctx.moveTo(cx, cy - r); sctx.lineTo(cx, cy + r); sctx.stroke();
+    sctx.setLineDash([3,3]); sctx.beginPath(); sctx.arc(cx, cy, r*.5, 0, 7); sctx.stroke(); sctx.setLineDash([]);
+    sctx.beginPath(); sctx.arc(cx, cy - r*.4, 2, 0, 7); sctx.fillStyle = 'rgba(0,0,0,.3)'; sctx.fill();
+    sctx.fillStyle = '#C62828'; sctx.beginPath(); sctx.arc(cx + spinX*r, cy - spinY*r, 6, 0, 7); sctx.fill();
+    let t = [];
+    if (spinY > 0.05) t.push(Math.abs(spinY - 0.4) < 0.06 ? 'natural roll' : 'high (follow)');
+    else if (spinY < -0.05) t.push('low (draw)');
+    if (spinX > 0.05) t.push('right english'); else if (spinX < -0.05) t.push('left english');
+    $('spinTxt').textContent = t.length ? t.join(', ') : 'center hit';
+  }
+  function setSpin(e){
+    const r = sc.getBoundingClientRect();
+    let x = (e.clientX - r.left - 60)/52, y = -(e.clientY - r.top - 60)/52;
+    const m = Math.hypot(x, y); if (m > 0.5){ x *= 0.5/m; y *= 0.5/m; }
+    if (m < 0.06){ x = 0; y = 0; }
+    spinX = x; spinY = y; drawSpin();
+  }
+  let spinDrag = false;
+  sc.addEventListener('pointerdown', e => { spinDrag = true; sc.setPointerCapture(e.pointerId); setSpin(e); });
+  sc.addEventListener('pointermove', e => { if (spinDrag) setSpin(e); });
+  sc.addEventListener('pointerup', () => spinDrag = false);
+
+  /* ---------- masa etkileşimi ---------- */
+  function toTable(e){ const r = cv.getBoundingClientRect(); return {x: (e.clientX - r.left)/s - RW, y: TH + RW - (e.clientY - r.top)/s}; }
+  let mode = null;
+  function setAim(q){ const dx = q.x - cue.x, dy = q.y - cue.y; if (Math.hypot(dx, dy) > 0.01) aimA = Math.atan2(dy, dx); }
+  function moveCue(q){
+    const xmax = GM.kitchen ? TW/4 : TW - R;
+    const x = Math.min(Math.max(q.x, R), xmax), y = Math.min(Math.max(q.y, R), TH - R);
+    if (balls.every(b => b === cue || !b.on || Math.hypot(b.x - x, b.y - y) >= 2*R)){ cue.x = x; cue.y = y; trail = []; }
+  }
+  cv.addEventListener('pointerdown', e => {
+    if (moving || GM.over) return;
+    cv.setPointerCapture(e.pointerId);
+    const q = toTable(e);
+    if (GM.inHand && Math.hypot(q.x - cue.x, q.y - cue.y) < R*2.2){ mode = 'place'; cv.style.cursor = 'grabbing'; }
+    else { mode = 'aim'; setAim(q); }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!mode) return;
+    const q = toTable(e);
+    if (mode === 'place') moveCue(q); else setAim(q);
+  });
+  const endPtr = () => { mode = null; cv.style.cursor = 'crosshair'; };
+  cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
+
+  /* ---------- kontroller ---------- */
+  function powLabel(){ const pw = +$('power').value; $('oPow').textContent = pw + '% (' + fmt(0.15 + pw/100*(MAXV - 0.15), 1) + ' m/s)'; }
+  $('power').addEventListener('input', powLabel);
+  $('shoot').addEventListener('click', shoot);
+  $('aimL').addEventListener('click', () => aimA += 0.2*Math.PI/180);
+  $('aimR').addEventListener('click', () => aimA -= 0.2*Math.PI/180);
+  $('rerack').addEventListener('click', rack);
+  $('mode').addEventListener('change', rack);
+  const allWhite = () => false;
+  $('slowBtn').addEventListener('click', () => { slow = !slow; $('slowBtn').setAttribute('aria-pressed', slow); $('slowBtn').textContent = slow ? 'Normal speed' : 'Slow motion'; });
+  ['muS','muR','eC','eB'].forEach(id => $(id).addEventListener('input', readPhys));
+  document.addEventListener('keydown', e => {
+    if (/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+    const st = (e.shiftKey ? 0.05 : 0.3)*Math.PI/180;
+    if (e.code === 'Space'){ e.preventDefault(); shoot(); }
+    else if (e.code === 'ArrowLeft' || e.code === 'ArrowUp'){ e.preventDefault(); aimA += st; }
+    else if (e.code === 'ArrowRight' || e.code === 'ArrowDown'){ e.preventDefault(); aimA -= st; }
+  });
+
+  let last = null, acc = 0;
+  function frame(ts){
+    if (last === null) last = ts;
+    const real = Math.min((ts - last)/1000, 0.05); last = ts;
+    if (moving){
+      acc += real*(slow ? 0.2 : 1);
+      while (acc >= 0.001 && moving){
+        step(0.001); acc -= 0.001;
+        if (allStopped()){ acc = 0; endShot(); }
+      }
+    }
+    draw(); readouts();
+    requestAnimationFrame(frame);
+  }
+
+  readPhys(); powLabel(); drawSpin(); rack(); updateButtons();
+  new ResizeObserver(fit).observe(document.body); fit();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
