@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fizik bilardosu</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.4 (build 2026-10-30 21:34 UTC)">
+<meta name="version" content="1.8 (build 2026-10-31 05:19 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -29,26 +29,60 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *,*::before,*::after{box-sizing:inherit}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.45}
-main{max-width:1240px;margin:0 auto;padding:20px 16px 36px}
-.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:10px 24px;margin-bottom:14px}
-h1{font-size:clamp(1.6rem,3.2vw,2.3rem);line-height:1.1;margin:0;font-weight:700;letter-spacing:-.015em}
-.players{display:flex;gap:10px;flex-wrap:wrap}
-.player{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:8px 12px;min-width:190px}
-.player.active{border:2px solid var(--accent);padding:7px 11px}
+main{padding:10px 12px 36px}
+.play{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:start;margin:0}
+.stage{min-width:0;display:flex;flex-direction:column;gap:12px}
+.side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.head{display:flex;flex-direction:column;gap:6px;min-width:0}
+h1{font-size:1.05rem;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.01em}
+.ver{font-size:.8rem;color:var(--muted);margin:-4px 0 2px}
+.players{display:flex;flex-direction:column;gap:6px}
+.player{display:grid;grid-template-columns:1fr auto;align-items:baseline;column-gap:6px;background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:4px 8px;min-width:0;font-size:.8rem}
+.player.active{border:2px solid var(--accent);padding:3px 7px}
 .player .name{font-weight:600}
-.player .grp{font-size:.85rem;color:var(--muted)}
-.tray{display:flex;gap:3px;margin-top:4px;min-height:14px;flex-wrap:wrap}
-.tray span{width:14px;height:14px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.25)}
-.stage{background:var(--panel);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
-#cv{display:block;width:100%;max-width:calc(66vh * 1.84);margin:0 auto;touch-action:none;cursor:crosshair}
-.shotbar{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid var(--rule);flex-wrap:wrap}
-.shotbar .pw{flex:1;min-width:200px;display:flex;align-items:center;gap:10px}
-.shotbar .pw label{font-size:.92rem;white-space:nowrap}
-.shotbar output{font-variant-numeric:tabular-nums;font-weight:600;font-size:.9rem;white-space:nowrap;min-width:9.5em}
-.shotbar #shoot{width:auto;min-width:120px}
-.shotbar .fine{display:flex;gap:6px}
-.status{padding:10px 14px;border-top:1px solid var(--rule);font-weight:500;min-height:2.6em}
-.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--rule)}
+.player .v{grid-column:2;grid-row:1;font-size:.95rem}
+.player .grp{grid-column:1/-1;font-size:.72rem;color:var(--muted)}
+.tray{grid-column:1/-1;display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+.tray:empty{display:none}
+.tray span{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.25)}
+.openPot{font-size:.8rem;color:var(--muted);padding:0 2px}
+.status{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:6px 8px;font-weight:500;font-size:.75rem;line-height:1.35}
+.status:empty{display:none}
+.gamebox{display:flex;flex-direction:column;gap:6px}
+.gamebox label{font-size:.75rem;color:var(--muted)}
+.gamebox select{padding:5px 6px;font-size:.8rem}
+#rerack{width:100%;padding:6px;font-size:.85rem}
+.shotbar #shoot{padding:9px;font-size:.95rem}
+#cv{display:block;width:100%;margin:0;touch-action:none;cursor:crosshair}
+.shotbar{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding-top:4px;border-top:1px solid var(--rule)}
+.shotbar .pwlab{font-weight:600;font-size:.85rem}
+.shotbar output{font-variant-numeric:tabular-nums;font-weight:600;font-size:.75rem}
+#power{writing-mode:vertical-lr;direction:rtl;width:34px;height:clamp(120px,30vh,320px);margin:0}
+.fine{display:flex;gap:4px;width:100%}
+.fine button{flex:1;padding:7px 0;white-space:nowrap;font-size:.8rem}
+@media (max-width:900px){
+  .play{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+  .side{display:contents}
+  .head{order:0}
+  .stage{order:1}
+  .status{order:2;font-size:.92rem;padding:8px 12px}
+  .shotbar{order:3}
+  .gamebox{order:4}
+  .players{flex-direction:row;flex-wrap:wrap}
+  .player{flex:1;min-width:150px;font-size:.9rem}
+  .gamebox{flex-direction:row;align-items:center;flex-wrap:wrap}
+  .gamebox select{flex:1;width:auto;min-width:160px}
+  .shotbar{flex-direction:row;flex-wrap:wrap;background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:10px 14px}
+  #power{writing-mode:horizontal-tb;direction:ltr;width:auto;height:auto;flex:1;min-width:150px}
+  .shotbar output{min-width:8.5em}
+  .fine{width:auto}
+  .fine button{padding:9px 10px}
+  #shoot{width:auto;min-width:120px}
+  #rerack{width:auto}
+}
+.below{max-width:1240px;margin:16px 0 0}
+.readbox{background:var(--panel);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
+.readouts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
 .readouts > div{padding:9px 14px;border-right:1px solid var(--rule)}
 .readouts > div:last-child{border-right:0}
 @media (max-width:620px){.readouts{grid-template-columns:repeat(2,minmax(0,1fr))}.readouts > div{border-bottom:1px solid var(--rule)}.readouts > div:nth-child(even){border-right:0}}
@@ -85,20 +119,40 @@ details p{max-width:76ch;margin:10px 0}
 </head>
 <body>
 <main>
-  <div class="top">
-    <h1>Fizik bilardosu</h1>
-    <div class="players" id="players"></div>
-  </div>
+  <div class="play">
+    <section class="stage">
+      <canvas id="cv" tabindex="0" aria-label="Bilardo masası. Nişan almak için masaya bas veya sürükle."></canvas>
+    </section>
 
-  <section class="stage">
-    <canvas id="cv" tabindex="0" aria-label="Bilardo masası. Nişan almak için masaya bas veya sürükle."></canvas>
-    <div class="shotbar">
-      <div class="pw"><label for="power">Güç</label>
-        <input type="range" id="power" min="3" max="100" step="1" value="45"><output id="oPow"></output></div>
+    <div class="side">
+    <div class="head">
+      <h1>Fizik bilardosu</h1><div class="ver" id="ver"></div>
+      <div class="players" id="players"></div>
+    </div>
+
+    <aside class="shotbar">
+      <label for="power" class="pwlab">Güç</label>
+      <input type="range" id="power" min="3" max="100" step="1" value="45">
+      <output id="oPow"></output>
       <div class="fine"><button id="aimL" aria-label="Nişanı sola çevir">↺ 0.1°</button><button id="aimR" aria-label="Nişanı sağa çevir">↻ 0.1°</button></div>
       <button id="shoot">Vur</button>
-    </div>
+      <button id="rerack">Yeni oyun</button>
+    </aside>
+
+    <div class="gamebox"><label for="mode">Mod</label>
+        <select id="mode" autocomplete="off">
+          <option value="8ball" selected>8 top, iki oyuncu</option>
+          <option value="free">Serbest antrenman (cepli)</option>
+          <option value="carom">3 top, serbest karambol</option>
+          <option value="three">3 top, 3 bant</option>
+        </select></div>
+
     <div class="status" id="status" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="below">
+  <section class="readbox">
     <div class="readouts">
       <div><div class="k">Istaka topu hızı</div><div class="v" id="rV">0.00<small>m/s</small></div></div>
       <div><div class="k">Hareket durumu</div><div class="v" id="rS">duruyor</div></div>
@@ -121,14 +175,7 @@ details p{max-width:76ch;margin:10px 0}
 
     <div class="panel">
       <h2>Oyun</h2>
-      <div class="ctl"><label for="mode">Mod</label>
-        <select id="mode" autocomplete="off">
-          <option value="8ball" selected>8 top, iki oyuncu</option>
-          <option value="free">Serbest antrenman (cepli)</option>
-          <option value="carom">3 top, serbest karambol</option>
-          <option value="three">3 top, 3 bant</option>
-        </select></div>
-      <div class="row"><button id="rerack">Yeniden diz</button><button id="slowBtn" aria-pressed="false">Ağır çekim</button></div>
+      <div class="row"><button id="slowBtn" aria-pressed="false">Ağır çekim</button></div>
       <div class="checks">
         <label><input type="checkbox" id="showGuide" checked> Nişan kılavuzu (hayalet top, 90° çizgisi)</label>
         <label><input type="checkbox" id="showPath" checked> Topumun gideceği yolu göster</label>
@@ -156,7 +203,8 @@ details p{max-width:76ch;margin:10px 0}
     <p>3 top modunda masa 2.84 m × 1.42 m, cepsiz ve toplar 61.5 mm. Kenarlardaki elmaslar gerçek masadaki gibi eşit aralıklı; 3 bant sistemlerini (örneğin elmas sistemi) burada deneyebilirsin. Sol üstteki sayaç, ıstaka topunun kaç banda değdiğini canlı gösterir.</p>
     <p>Basitleştirmeler: ıstaka sapması (squirt), havada sekme, top–top sürtünmesi (throw) ve cep ağızlarındaki çene sekmeleri modellenmedi.</p>
   </details>
-  <footer class="credits">Fizik Bilardosu v1.4, build 2026-10-30 21:34 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
+  <footer class="credits">Fizik Bilardosu v1.8, build 2026-10-31 05:19 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
+  </div>
 </main>
 
 <script>
@@ -421,6 +469,15 @@ details p{max-width:76ch;margin:10px 0}
       d.innerHTML = '<div class="name">Oyuncu ' + (i+1) + (GM.turn === i && !GM.over ? ' ●' : '') + '</div><div class="grp">' + grp + '</div><div class="tray">' + tray + '</div>';
       box.appendChild(d);
     }
+    if (n && !GM.groups[0]){
+      const gone = balls.filter(b => b.n && b.n !== 8 && !b.on);
+      if (gone.length){
+        const d = document.createElement('div'); d.className = 'openPot';
+        d.innerHTML = 'Cebe girenler: ' + '<span class="tray" style="display:inline-flex;vertical-align:middle">' + gone.map(b =>
+          '<span title="' + b.n + '" style="background:' + (b.n > 8 ? 'linear-gradient(#fff 28%,' + colorOf(b.n) + ' 28% 72%,#fff 72%)' : colorOf(b.n)) + '"></span>').join('') + '</span>';
+        box.appendChild(d);
+      }
+    }
   }
 
   function setStatus(t){ $('status').textContent = t; }
@@ -431,6 +488,10 @@ details p{max-width:76ch;margin:10px 0}
   let W = 0, H = 0, s = 1;
   function fit(){
     const dpr = window.devicePixelRatio || 1;
+    const asp = (TW + 2*RW)/(TH + 2*RW);
+    const wide = window.matchMedia('(min-width: 901px)').matches;
+    cv.style.maxWidth = Math.max(320, (window.innerHeight - 20)*asp) + 'px';
+    document.querySelector('.play').style.maxWidth = wide ? (parseFloat(cv.style.maxWidth) + 162) + 'px' : '';
     W = cv.getBoundingClientRect().width; s = W/(TW + 2*RW); H = (TH + 2*RW)*s;
     cv.style.height = H + 'px'; cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);
@@ -734,7 +795,8 @@ details p{max-width:76ch;margin:10px 0}
   }
 
   readPhys(); powLabel(); drawSpin(); rack(); updateButtons();
-  new ResizeObserver(fit).observe(document.body); fit();
+  new ResizeObserver(fit).observe(document.body); window.addEventListener('resize', fit); fit();
+  $('ver').textContent = 'v' + document.querySelector('meta[name="version"]').content.split(' ')[0];
   requestAnimationFrame(frame);
 })();
 </script>

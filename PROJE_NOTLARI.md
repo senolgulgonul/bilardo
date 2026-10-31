@@ -8,7 +8,7 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Yazar: Şenol Gülgönül, "Built with Claude"
 
 ## Dosyalar
-- `index.html`: İngilizce sürüm, GitHub Pages’te yayında olan (v1.0)
+- `index.html`: İngilizce sürüm, GitHub Pages’te yayında olan
 - `bilardo-tr.html`: Aynı oyunun Türkçe sürümü
 - `README.md`, `CHANGELOG.md`, `VERSION`: Repo dosyaları
 - `extras/`: Başlangıçtaki eğik düzlem (1B) ve eğik masa (2B) simülasyonları
@@ -37,7 +37,8 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Baş çizgisi (head string) kaldırıldı, geri getirme; açılışta yalnızca gölgeli alan kalsın
 - 3 topta "herkes beyazla" seçeneği istenmedi; resmî kural kalsın
 - Yol tahmini açık kalsın; "atıştan sonra göster" modu istenmedi
-- Güç ve Vur düğmesi masanın hemen altında olmalı
+- Yerleşim: masa solda, ekran yüksekliğinin tamamını kullanacak kadar büyük (oran korunur, top büyüklüğü masaya göre gerçek). Sağda 150 px dar sütun, küçük kontroller: başlık + sürüm, skor kartları, dikey güç, 0.1° ince ayar, Vur, Yeni oyun (Vur’un hemen altında), mod, en altta durum mesajı. Diğer her şey aşağıda. Dar ekranda alt alta dizilir (durum mesajı masanın altında)
+- Sol paneldeki sürüm etiketi `<meta name="version">`dan otomatik okunur
 - Yayında yalnızca İngilizce sürüm; dil geçiş bağlantısı şimdilik istenmedi (TR dosyası yine senkron tutulur)
 - Sayfa yenilenince her zaman 8 topla açılmalı
 - Kısa, sade metinler; LinkedIn’de kapanış "Built with Claude."

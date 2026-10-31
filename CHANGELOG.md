@@ -3,6 +3,25 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.8 (2026-10-31 05:19 UTC)
+
+- New game button sits right under Shoot; mode menu below it, status message at the bottom of the right column
+- Fix: removed a leftover layout rule that broke the layout on screens 901–1000 px wide
+
+## v1.7 (2026-10-31 05:15 UTC)
+
+- Even bigger table: the right column is narrower (150 px) with smaller controls, and the status message moved into it, so the table can use the full screen height (about 10% bigger on a typical laptop)
+
+## v1.6 (2026-10-31 05:09 UTC)
+
+- Bigger table: it now sits on the left and fills the screen; everything else moved to one narrow column on the right (title, compact score cards, power, fine aim, Shoot, mode, New game). The status line sits right under the table. Balls and table keep their true proportions
+
+## v1.5 (2026-10-31 05:03 UTC)
+
+- New layout: the table is as large as the screen allows; title, version, scores, status, mode and a New game button sit on the left, and a vertical power slider, fine aim and Shoot on the right. Spin, settings and explanations stay below the table. On narrow screens everything stacks
+- New game button replaces Re-rack, no page refresh needed
+- 8-ball: while the table is open, balls already potted (e.g. on the break) are shown under the score cards
+
 ## v1.4 (2026-10-30 21:34 UTC)
 
 - Stronger top power: maximum shot speed is now 10 m/s (was 7.5); low and mid power feel the same, only the top of the slider is stronger. Breaks now pocket balls far more often
