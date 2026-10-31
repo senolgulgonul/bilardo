@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fizik bilardosu</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.12 (build 2026-10-31 07:13 UTC)">
+<meta name="version" content="1.13 (build 2026-10-31 07:19 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -89,7 +89,11 @@ h1{font-size:1.05rem;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.
   .stage,.head,.shotbar,.gamebox,.status{order:0}
   h1,.ver{display:none}
   .players{flex-direction:column;gap:4px}
-  .player{flex:none;min-width:0;font-size:.72rem;padding:2px 6px;align-items:start}
+  .player{display:flex;flex-wrap:wrap;align-items:baseline;flex:none;min-width:0;font-size:.72rem;padding:2px 6px}
+  .player .name{flex:1 1 auto;order:0}
+  .player .v{order:1}
+  .player .grp{flex:0 0 100%;order:2}
+  .player .tray{flex:0 0 100%;order:3}
   .player.active{padding:1px 5px}
   .player .grp{font-size:.62rem}
   .openPot{font-size:.65rem}
@@ -236,7 +240,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>3 top modunda masa 2.84 m × 1.42 m, cepsiz ve toplar 61.5 mm. Kenarlardaki elmaslar gerçek masadaki gibi eşit aralıklı; 3 bant sistemlerini (örneğin elmas sistemi) burada deneyebilirsin. Sol üstteki sayaç, ıstaka topunun kaç banda değdiğini canlı gösterir.</p>
     <p>Basitleştirmeler: ıstaka sapması (squirt), havada sekme, top–top sürtünmesi (throw) ve cep ağızlarındaki çene sekmeleri modellenmedi.</p>
   </details>
-  <footer class="credits">Fizik Bilardosu v1.12, build 2026-10-31 07:13 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
+  <footer class="credits">Fizik Bilardosu v1.13, build 2026-10-31 07:19 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
   </div>
 </main>
 

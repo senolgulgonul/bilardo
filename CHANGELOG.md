@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.13 (2026-10-31 07:19 UTC)
+
+- iPhone landscape: score cards use a simple flex layout instead of grid, so the group name and potted balls stay inside their card (Safari drew them far below)
+
 ## v1.12 (2026-10-31 07:13 UTC)
 
 - iPhone landscape fixes: the power slider is vertical on iOS Safari too (a rotated horizontal slider, since Safari does not draw vertical sliders); score cards no longer get squeezed, so "Table open" stays inside its card; the right column uses the visible screen height
