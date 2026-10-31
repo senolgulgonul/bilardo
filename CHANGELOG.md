@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.10 (2026-10-31 06:13 UTC)
+
+- Carom and three-cushion: official opening rule. The opening shot must hit the red ball first, otherwise it scores no point; the predicted path only shows "point ✓" for a legal opening
+
 ## v1.9 (2026-10-31 06:03 UTC)
 
 - Physics: cushions now touch the ball above its center, at the official nose height (pool 63.5% of the ball, WPA; carom 60.2%, UMB 37 mm). Cushion friction (μ ≈ 0.14) now acts on all three spin axes, so cushions also change follow and draw. Balls bend less after a cushion than before, and rebound angles and side-spin effects are based on friction instead of a fixed factor

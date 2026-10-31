@@ -40,6 +40,7 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Yol tahmini açık kalsın; "atıştan sonra göster" modu istenmedi
 - Yerleşim: masa solda, ekran yüksekliğinin tamamını kullanacak kadar büyük (oran korunur, top büyüklüğü masaya göre gerçek). Sağda 150 px dar sütun, küçük kontroller: başlık + sürüm, skor kartları, dikey güç, 0.1° ince ayar, Vur, Yeni oyun (Vur’un hemen altında), mod, en altta durum mesajı. Diğer her şey aşağıda. Dar ekranda alt alta dizilir (durum mesajı masanın altında)
 - Sol paneldeki sürüm etiketi `<meta name="version">`dan otomatik okunur
+- Karambolde (3 top ve 3 bant) resmî açılış kuralı: açılış atışı önce kırmızıya vurmalı (UMB), yoksa sayı yok
 - 8 topta da resmî WPA kuralı: açılıştan sonra masa açık, grup ilk geçerli sokuşla belirlenir (kafe kuralı istenmedi)
 - Yayında yalnızca İngilizce sürüm; dil geçiş bağlantısı şimdilik istenmedi (TR dosyası yine senkron tutulur)
 - Sayfa yenilenince her zaman 8 topla açılmalı

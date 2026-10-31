@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fizik bilardosu</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.9 (build 2026-10-31 06:03 UTC)">
+<meta name="version" content="1.10 (build 2026-10-31 06:13 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -204,7 +204,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>3 top modunda masa 2.84 m × 1.42 m, cepsiz ve toplar 61.5 mm. Kenarlardaki elmaslar gerçek masadaki gibi eşit aralıklı; 3 bant sistemlerini (örneğin elmas sistemi) burada deneyebilirsin. Sol üstteki sayaç, ıstaka topunun kaç banda değdiğini canlı gösterir.</p>
     <p>Basitleştirmeler: ıstaka sapması (squirt), havada sekme, top–top sürtünmesi (throw) ve cep ağızlarındaki çene sekmeleri modellenmedi.</p>
   </details>
-  <footer class="credits">Fizik Bilardosu v1.9, build 2026-10-31 06:03 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
+  <footer class="credits">Fizik Bilardosu v1.10, build 2026-10-31 06:13 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
   </div>
 </main>
 
@@ -252,10 +252,10 @@ details p{max-width:76ch;margin:10px 0}
     if (isCarom()){
       const white = makeBall(0, TW/4, TH/2 - 0.1525), yellow = makeBall(20, TW/4, TH/2), red = makeBall(21, TW*3/4, TH/2);
       balls = [white, yellow, red]; cue = white;
-      GM.turn = 0; GM.scores = [0, 0]; GM.groups = [null, null]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false;
+      GM.turn = 0; GM.scores = [0, 0]; GM.groups = [null, null]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false; GM.caromBreak = true;
       aimA = Math.atan2(red.y - white.y, red.x - white.x); moving = false; trail = [];
       setStatus('3 top' + (GM.mode === 'three' ? ', 3 bant' : '') + ': Oyuncu 1 beyaz topla başlar. Sayı için beyaz top sarıya ve kırmızıya çarpmalı' +
-        (GM.mode === 'three' ? '; ikinci topa çarpmadan önce en az 3 banda değmeli.' : '.') + ' ' + TARGET[GM.mode] + ' sayıya ulaşan kazanır.');
+        (GM.mode === 'three' ? '; ikinci topa çarpmadan önce en az 3 banda değmeli.' : '.') + ' ' + TARGET[GM.mode] + ' sayıya ulaşan kazanır. Açılış atışında önce kırmızıya vurulmalı.');
       renderPlayers(); updateButtons(); return;
     }
     cue = makeBall(0, TW/4, TH/2); balls.push(cue);
@@ -392,15 +392,16 @@ details p{max-width:76ch;margin:10px 0}
     moving = false;
     for (const b of balls) b.wz = 0;
     if (isCarom()){
-      const s = shot, me = GM.turn, two = s.hits.length >= 2;
-      const ok = two && (GM.mode === 'carom' || s.hits[1].cush >= 3);
+      const s = shot, me = GM.turn, two = s.hits.length >= 2, redFirst = !GM.caromBreak || (s.hits.length > 0 && s.hits[0].n === 21);
+      GM.caromBreak = false;
+      const ok = two && redFirst && (GM.mode === 'carom' || s.hits[1].cush >= 3);
       const name = n => n === 0 ? 'beyaz' : n === 20 ? 'sarı' : 'kırmızı';
       if (ok){
         GM.scores[me]++;
         if (GM.scores[me] >= TARGET[GM.mode]){ GM.over = true; setStatus('Oyuncu ' + (me+1) + ' ' + GM.scores[me] + ' sayıyla kazandı!'); }
         else setStatus('Sayı! ' + (GM.mode === 'three' ? 'İkinci topa ' + s.hits[1].cush + ' bant sonra çarptı. ' : '') + 'Oyuncu ' + (me+1) + ' devam ediyor.');
       } else {
-        let why = !s.hits.length ? 'hiçbir topa çarpmadı' : !two ? 'yalnızca ' + name(s.hits[0].n) + ' topa çarptı'
+        let why = two && !redFirst ? 'açılış atışında önce kırmızıya vurulmalı' : !s.hits.length ? 'hiçbir topa çarpmadı' : !two ? 'yalnızca ' + name(s.hits[0].n) + ' topa çarptı'
           : 'ikinci topa ' + s.hits[1].cush + ' bantta ulaştı, en az 3 gerekli';
         GM.turn = 1 - me; cue = balls.find(b => b.n === (allWhite() || GM.turn === 0 ? 0 : 20));
         setStatus('Sayı yok: ' + why + '. Sıra Oyuncu ' + (GM.turn+1) + '’de (' + (allWhite() || GM.turn === 0 ? 'beyaz' : 'sarı') + ' top).');
@@ -551,7 +552,7 @@ details p{max-width:76ch;margin:10px 0}
 
   let pred = null, predKey = '';
   function predict(){
-    const key = [aimA, $('power').value, spinX, spinY, cue.x, cue.y, PH.muS, PH.muR, PH.eC, PH.eB, GM.mode,
+    const key = [aimA, $('power').value, spinX, spinY, cue.x, cue.y, PH.muS, PH.muR, PH.eC, PH.eB, GM.mode, GM.caromBreak,
       balls.map(b => b.on ? Math.round(b.x*1e4) + ',' + Math.round(b.y*1e4) : '-').join(';')].join('|');
     if (key === predKey) return pred;
     predKey = key;
@@ -572,7 +573,7 @@ details p{max-width:76ch;margin:10px 0}
       if (i % 20 === 0 && allStopped()) break;
     }
     const h = shot.hits;
-    pred = {path, marks, score: isCarom() && h.length >= 2 && (GM.mode === 'carom' || h[1].cush >= 3),
+    pred = {path, marks, score: isCarom() && h.length >= 2 && (!GM.caromBreak || h[0].n === 21) && (GM.mode === 'carom' || h[1].cush >= 3),
       obj: !isCarom() && opath.length > 1 ? {path: opath, potted: !ob.on} : null, scratch: !isCarom() && !cue.on};
     balls = sB; cue = sC; shot = sS; trail = sT; trailT = sTT;
     return pred;
