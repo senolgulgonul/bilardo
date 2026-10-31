@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.14 (2026-10-31 07:23 UTC)
+
+- Phones in landscape: shorter power slider so Shoot and New game fit on screen without scrolling
+
 ## v1.13 (2026-10-31 07:19 UTC)
 
 - iPhone landscape: score cards use a simple flex layout instead of grid, so the group name and potted balls stay inside their card (Safari drew them far below)
