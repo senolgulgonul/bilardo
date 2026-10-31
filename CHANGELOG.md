@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.11 (2026-10-31 07:07 UTC)
+
+- Phones in landscape: the table fills the screen height with a compact control column on the right (scores, power, fine aim, Shoot, New game; status and mode scroll below). Respects the iPhone notch. Desktop and portrait layouts are unchanged
+
 ## v1.10 (2026-10-31 06:13 UTC)
 
 - Carom and three-cushion: official opening rule. The opening shot must hit the red ball first, otherwise it scores no point; the predicted path only shows "point ✓" for a legal opening

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.10 (build 2026-10-31 06:13 UTC)">
+<meta name="version" content="1.11 (build 2026-10-31 07:07 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -79,6 +79,30 @@ h1{font-size:1.05rem;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.
   .fine button{padding:9px 10px}
   #shoot{width:auto;min-width:120px}
   #rerack{width:auto}
+}
+@media (orientation:landscape) and (max-height:500px){
+  main{padding:6px max(8px, env(safe-area-inset-right, 0px)) 24px max(8px, env(safe-area-inset-left, 0px))}
+  .play{display:grid;grid-template-columns:minmax(0,1fr) 124px;gap:8px;align-items:start}
+  .side{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 12px);overflow-y:auto}
+  .stage,.head,.shotbar,.gamebox,.status{order:0}
+  h1,.ver{display:none}
+  .players{flex-direction:column;gap:4px}
+  .player{flex:none;min-width:0;font-size:.72rem;padding:2px 6px}
+  .player.active{padding:1px 5px}
+  .player .grp{font-size:.62rem}
+  .openPot{font-size:.65rem}
+  .shotbar{flex-direction:column;flex-wrap:nowrap;background:none;border:0;border-top:1px solid var(--rule);border-radius:0;padding:4px 0 0;gap:5px}
+  .shotbar .pwlab{font-size:.72rem}
+  #power{writing-mode:vertical-lr;direction:rtl;width:30px;height:clamp(70px,30vh,150px);flex:none;min-width:0}
+  .shotbar output{min-width:0;font-size:.65rem}
+  .fine{width:100%}
+  .fine button{padding:5px 0;font-size:.72rem}
+  .shotbar #shoot{width:100%;min-width:0;padding:7px;font-size:.85rem}
+  #rerack{width:100%;padding:4px;font-size:.72rem}
+  .gamebox{flex-direction:column;align-items:stretch}
+  .gamebox label{display:none}
+  .gamebox select{min-width:0;width:100%;font-size:.7rem;padding:3px 4px}
+  .status{font-size:.68rem;padding:4px 6px}
 }
 .below{max-width:1240px;margin:16px 0 0}
 .readbox{background:var(--panel);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
@@ -204,7 +228,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.10, build 2026-10-31 06:13 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.11, build 2026-10-31 07:07 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
   </div>
 </main>
 
@@ -506,9 +530,9 @@ details p{max-width:76ch;margin:10px 0}
   function fit(){
     const dpr = window.devicePixelRatio || 1;
     const asp = (TW + 2*RW)/(TH + 2*RW);
-    const wide = window.matchMedia('(min-width: 901px)').matches;
-    cv.style.maxWidth = Math.max(320, (window.innerHeight - 20)*asp) + 'px';
-    document.querySelector('.play').style.maxWidth = wide ? (parseFloat(cv.style.maxWidth) + 162) + 'px' : '';
+    const wide = window.matchMedia('(min-width: 901px), (orientation: landscape) and (max-height: 500px)').matches;
+    cv.style.maxWidth = Math.max(320, (window.innerHeight - (window.innerHeight <= 500 ? 12 : 20))*asp) + 'px';
+    document.querySelector('.play').style.maxWidth = wide ? (parseFloat(cv.style.maxWidth) + (window.innerHeight <= 500 ? 132 : 162)) + 'px' : '';
     W = cv.getBoundingClientRect().width; s = W/(TW + 2*RW); H = (TH + 2*RW)*s;
     cv.style.height = H + 'px'; cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
     ctx.setTransform(dpr,0,0,dpr,0,0);

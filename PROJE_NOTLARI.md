@@ -38,7 +38,7 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Baş çizgisi (head string) kaldırıldı, geri getirme; açılışta yalnızca gölgeli alan kalsın
 - 3 topta "herkes beyazla" seçeneği istenmedi; resmî kural kalsın
 - Yol tahmini açık kalsın; "atıştan sonra göster" modu istenmedi
-- Yerleşim: masa solda, ekran yüksekliğinin tamamını kullanacak kadar büyük (oran korunur, top büyüklüğü masaya göre gerçek). Sağda 150 px dar sütun, küçük kontroller: başlık + sürüm, skor kartları, dikey güç, 0.1° ince ayar, Vur, Yeni oyun (Vur’un hemen altında), mod, en altta durum mesajı. Diğer her şey aşağıda. Dar ekranda alt alta dizilir (durum mesajı masanın altında)
+- Yerleşim: masa solda, ekran yüksekliğinin tamamını kullanacak kadar büyük (oran korunur, top büyüklüğü masaya göre gerçek). Sağda 150 px dar sütun, küçük kontroller: başlık + sürüm, skor kartları, dikey güç, 0.1° ince ayar, Vur, Yeni oyun (Vur’un hemen altında), mod, en altta durum mesajı. Diğer her şey aşağıda. Dar ekranda (dikey telefon) alt alta dizilir. Yatay telefonda (yükseklik ≤ 500 px) masaya yakın düzen: sağda 124 px sıkı sütun, başlık gizli, çentik payı var (durum mesajı masanın altında)
 - Sol paneldeki sürüm etiketi `<meta name="version">`dan otomatik okunur
 - Karambolde (3 top ve 3 bant) resmî açılış kuralı: açılış atışı önce kırmızıya vurmalı (UMB), yoksa sayı yok
 - 8 topta da resmî WPA kuralı: açılıştan sonra masa açık, grup ilk geçerli sokuşla belirlenir (kafe kuralı istenmedi)
