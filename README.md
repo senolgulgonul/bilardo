@@ -1,6 +1,6 @@
 # Physics Billiards 🎱
 
-**v1.8**, build 2026-10-31 05:19 UTC, by **Şenol Gülgönül**
+**v1.9**, build 2026-10-31 06:03 UTC, by **Şenol Gülgönül**
 
 A browser billiards game built on a real rigid-body model of ball and cloth — no game engine, no install, one HTML file.
 
@@ -22,6 +22,7 @@ Tap or drag on the table to aim, set power with the slider, pick a contact point
 
 - 9 ft pool table (2.54 × 1.27 m, 57.2 mm balls); carom table 2.84 × 1.42 m, 61.5 mm balls.
 - Sliding friction μ ≈ 0.2, rolling resistance ≈ 0.01, ball–ball e ≈ 0.95, cushion e ≈ 0.75.
+- Cushion nose height 63.5% of ball diameter on the pool table (WPA), 60.2% on the carom table (UMB 37 mm); ball–cushion friction μ ≈ 0.14, one impulse per impact, no ball hop.
 - Integrated at fixed 1 ms steps for determinism.
 - Not modeled: squirt, throw, airborne balls, pocket jaw rattles.
 

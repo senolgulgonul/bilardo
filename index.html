@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.8 (build 2026-10-31 05:19 UTC)">
+<meta name="version" content="1.9 (build 2026-10-31 06:03 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -200,10 +200,11 @@ details p{max-width:76ch;margin:10px 0}
     <p>Pool table 9 ft (2.54 m × 1.27 m), balls 57.2 mm. A center-ball hit makes the ball slide first. Cloth friction reduces the slip speed at a rate of 7/2·μg while spinning the ball up; once slipping stops the ball rolls, at exactly 5/7 of its initial speed.</p>
     <p>Hitting high gives topspin (follow), hitting low gives backspin (draw). On a full hit the cue ball hands over most of its forward speed but keeps its spin; friction turns that spin back into motion, so the ball follows forward or draws back. None of this is scripted: it falls out of the physics.</p>
     <p>With equal masses, a stun (sliding) hit sends the two balls off at 90° to each other. Side spin changes the rebound angle off a cushion, because cushion friction couples the sidespin with the tangential speed.</p>
+    <p>Cushions touch the ball above its center, as on real tables: 63.5% of the ball height on the pool table (WPA) and 60.2% on the carom table (UMB, 37 mm). The impact therefore also changes follow and draw, so a ball coming off a cushion slides briefly and its path bends a little before it rolls again.</p>
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.8, build 2026-10-31 05:19 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.9, build 2026-10-31 06:03 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
   </div>
 </main>
 
@@ -219,9 +220,11 @@ details p{max-width:76ch;margin:10px 0}
     {x:-0.006,y:TH+0.006,r:0.06},{x:TW/2,y:TH+0.012,r:0.05},{x:TW+0.006,y:TH+0.006,r:0.06}];
   let POCKETS = POOL_POCKETS;
   const isCarom = () => GM.mode === 'carom' || GM.mode === 'three';
+  let CUSH_H = 0.635; const MU_C = 0.14;  // ball–cushion friction
   function setTable(carom){
-    if (carom){ TW = 2.84; TH = 1.42; R = 0.03075; POCKETS = []; }
-    else { TW = 2.54; TH = 1.27; R = 0.028575; POCKETS = POOL_POCKETS; }
+    // CUSH_H: cushion nose height as a fraction of the ball diameter (UMB 37 mm / 61.5 mm; WPA 63.5 %)
+    if (carom){ TW = 2.84; TH = 1.42; R = 0.03075; POCKETS = []; CUSH_H = 0.602; }
+    else { TW = 2.54; TH = 1.27; R = 0.028575; POCKETS = POOL_POCKETS; CUSH_H = 0.635; }
   }
   const COL = {0:'#F4F1E8',1:'#F2C230',2:'#1D4ED8',3:'#C62828',4:'#6B21A8',5:'#EA6A0A',6:'#15803D',7:'#7F1D1D',8:'#16181A'};
   const colorOf = n => n === 20 ? '#F2C230' : n === 21 ? '#C62828' : n > 8 ? COL[n-8] : COL[n];
@@ -285,14 +288,27 @@ details p{max-width:76ch;margin:10px 0}
     b.x += b.vx*dt; b.y += b.vy*dt;
   }
 
+  // Cushion impact. The cushion nose touches the ball above its center (CUSH_H of the diameter),
+  // so the contact normal tilts down. One impulse: the normal part reverses the speed into the
+  // cushion (restitution eC); friction at the contact point (Coulomb, MU_C, capped at sticking)
+  // changes the speed along the rail and all three spin axes. The table holds the ball down (no hop).
   function cushion(b, nx, ny){
     const vn = b.vx*nx + b.vy*ny;
     if (vn >= 0) return;
     if (shot && b === shot.cueBall) shot.cush++;
-    const tx = -ny, ty = nx, vt = b.vx*tx + b.vy*ty;
-    const slip = vt - b.wz*R, dvt = -slip*(2/7)*0.6, nvn = -PH.eC*vn;
-    b.vx = nvn*nx + (vt + dvt)*tx; b.vy = nvn*ny + (vt + dvt)*ty;
-    b.wz -= 5*dvt/(2*R);
+    const S = 2*CUSH_H - 1, C = Math.sqrt(1 - S*S);
+    const rx = -R*C*nx, ry = -R*C*ny, rz = R*S;                       // contact point from ball center
+    const ux = b.vx + b.wy*rz - b.wz*ry, uy = b.vy + b.wz*rx - b.wx*rz, uz = b.wx*ry - b.wy*rx;
+    const Nx = C*nx, Ny = C*ny, Nz = -S, uN = ux*Nx + uy*Ny + uz*Nz;  // contact normal, into the ball
+    const tx = ux - uN*Nx, ty = uy - uN*Ny, tz = uz - uN*Nz, ut = Math.hypot(tx, ty, tz);
+    const JN = (1 + PH.eC)*(-vn)/C;                                   // normal impulse per unit mass
+    b.vx += JN*C*nx; b.vy += JN*C*ny;
+    if (ut > 1e-9){
+      const jf = Math.min(MU_C*JN, (2/7)*ut), fx = -jf*tx/ut, fy = -jf*ty/ut, fz = -jf*tz/ut;
+      b.vx += fx; b.vy += fy;
+      const k = 1/(0.4*R*R);                                          // m/I for a solid sphere
+      b.wx += k*(ry*fz - rz*fy); b.wy += k*(rz*fx - rx*fz); b.wz += k*(rx*fy - ry*fx);
+    }
   }
 
   function rails(b){

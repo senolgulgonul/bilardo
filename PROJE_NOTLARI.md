@@ -24,6 +24,7 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Simülasyon sabit 1 ms adımla çalışır. Yol tahmini aynı motoru önceden koşturur; bu yüzden gerçek atış çizgiyi birebir izler. Adım sistemini değiştirirken determinizmi bozma!
 - Güç eğrisi `speedOf()`: alt ve orta güç eskisi gibi (7.35 m/s eğim), en üstte 10 m/s. Atış ve yol tahmini aynı fonksiyonu kullanır
 - İnce nişan: düğmeler 0.1°, ok tuşları 0.3°, Shift + ok 0.05°
+- Bant modeli (v1.9): bant burnu merkezin üstünde (cepli %63.5 WPA, karambol %60.2 UMB). Tek impuls: normal bileşen eC ile, temas noktasında Coulomb sürtünmesi (μ 0.14, yapışma sınırlı) üç dönme eksenini de etkiler, top zıplamaz. Eski model (sabit 0.6 yapışma, yalnız yan falso) v1.8’de; yavaşlık veya garip davranış olursa geri alınabilir. Ölçüm: yol tahmini ortalama 14 ms → 16 ms
 - Modellenmeyenler: squirt, throw, havada sekme, cep çenesi sekmeleri
 
 ## Oyun modları
@@ -39,6 +40,7 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Yol tahmini açık kalsın; "atıştan sonra göster" modu istenmedi
 - Yerleşim: masa solda, ekran yüksekliğinin tamamını kullanacak kadar büyük (oran korunur, top büyüklüğü masaya göre gerçek). Sağda 150 px dar sütun, küçük kontroller: başlık + sürüm, skor kartları, dikey güç, 0.1° ince ayar, Vur, Yeni oyun (Vur’un hemen altında), mod, en altta durum mesajı. Diğer her şey aşağıda. Dar ekranda alt alta dizilir (durum mesajı masanın altında)
 - Sol paneldeki sürüm etiketi `<meta name="version">`dan otomatik okunur
+- 8 topta da resmî WPA kuralı: açılıştan sonra masa açık, grup ilk geçerli sokuşla belirlenir (kafe kuralı istenmedi)
 - Yayında yalnızca İngilizce sürüm; dil geçiş bağlantısı şimdilik istenmedi (TR dosyası yine senkron tutulur)
 - Sayfa yenilenince her zaman 8 topla açılmalı
 - Kısa, sade metinler; LinkedIn’de kapanış "Built with Claude."
