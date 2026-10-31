@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.11 (build 2026-10-31 07:07 UTC)">
+<meta name="version" content="1.12 (build 2026-10-31 07:13 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -58,6 +58,7 @@ h1{font-size:1.05rem;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.
 .shotbar .pwlab{font-weight:600;font-size:.85rem}
 .shotbar output{font-variant-numeric:tabular-nums;font-weight:600;font-size:.75rem}
 #power{writing-mode:vertical-lr;direction:rtl;width:34px;height:clamp(120px,30vh,320px);margin:0}
+.pwbox{display:contents}
 .fine{display:flex;gap:4px;width:100%}
 .fine button{flex:1;padding:7px 0;white-space:nowrap;font-size:.8rem}
 @media (max-width:900px){
@@ -83,11 +84,12 @@ h1{font-size:1.05rem;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.
 @media (orientation:landscape) and (max-height:500px){
   main{padding:6px max(8px, env(safe-area-inset-right, 0px)) 24px max(8px, env(safe-area-inset-left, 0px))}
   .play{display:grid;grid-template-columns:minmax(0,1fr) 124px;gap:8px;align-items:start}
-  .side{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 12px);overflow-y:auto}
+  .side{display:flex;flex-direction:column;gap:6px;max-height:calc(100vh - 12px);max-height:calc(100dvh - 12px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .side > *,.players > *{flex-shrink:0}
   .stage,.head,.shotbar,.gamebox,.status{order:0}
   h1,.ver{display:none}
   .players{flex-direction:column;gap:4px}
-  .player{flex:none;min-width:0;font-size:.72rem;padding:2px 6px}
+  .player{flex:none;min-width:0;font-size:.72rem;padding:2px 6px;align-items:start}
   .player.active{padding:1px 5px}
   .player .grp{font-size:.62rem}
   .openPot{font-size:.65rem}
@@ -103,6 +105,12 @@ h1{font-size:1.05rem;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.
   .gamebox label{display:none}
   .gamebox select{min-width:0;width:100%;font-size:.7rem;padding:3px 4px}
   .status{font-size:.68rem;padding:4px 6px}
+  /* iOS Safari does not draw vertical range inputs: rotate a horizontal one inside a fixed box */
+  @supports (-webkit-touch-callout: none){
+    .pwbox{display:block;position:relative;width:30px;height:clamp(70px,24vh,140px);margin:0 auto}
+    .pwbox #power{position:absolute;left:50%;top:50%;writing-mode:horizontal-tb;direction:ltr;
+      width:clamp(70px,24vh,140px);height:30px;margin:0;transform:translate(-50%,-50%) rotate(-90deg)}
+  }
 }
 .below{max-width:1240px;margin:16px 0 0}
 .readbox{background:var(--panel);border:1px solid var(--rule);border-radius:12px;overflow:hidden}
@@ -156,7 +164,7 @@ details p{max-width:76ch;margin:10px 0}
 
     <aside class="shotbar">
       <label for="power" class="pwlab">Power</label>
-      <input type="range" id="power" min="3" max="100" step="1" value="45">
+      <div class="pwbox"><input type="range" id="power" min="3" max="100" step="1" value="45"></div>
       <output id="oPow"></output>
       <div class="fine"><button id="aimL" aria-label="Rotate aim left">↺ 0.1°</button><button id="aimR" aria-label="Rotate aim right">↻ 0.1°</button></div>
       <button id="shoot">Shoot</button>
@@ -228,7 +236,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.11, build 2026-10-31 07:07 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.12, build 2026-10-31 07:13 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
   </div>
 </main>
 

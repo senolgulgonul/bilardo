@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.12 (2026-10-31 07:13 UTC)
+
+- iPhone landscape fixes: the power slider is vertical on iOS Safari too (a rotated horizontal slider, since Safari does not draw vertical sliders); score cards no longer get squeezed, so "Table open" stays inside its card; the right column uses the visible screen height
+
 ## v1.11 (2026-10-31 07:07 UTC)
 
 - Phones in landscape: the table fills the screen height with a compact control column on the right (scores, power, fine aim, Shoot, New game; status and mode scroll below). Respects the iPhone notch. Desktop and portrait layouts are unchanged
