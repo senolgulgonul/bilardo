@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.14 (build 2026-10-31 07:23 UTC)">
+<meta name="version" content="1.16 (build 2026-11-02 07:32 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -213,7 +213,7 @@ details p{max-width:76ch;margin:10px 0}
       <h2>Game</h2>
       <div class="row"><button id="slowBtn" aria-pressed="false">Slow motion</button></div>
       <div class="checks">
-        <label><input type="checkbox" id="showGuide" checked> Aiming guide (ghost ball, 90° line)</label>
+        <label><input type="checkbox" id="showGuide" checked> Aiming guide (ghost ball, 90° line, cue line to the rail with diamond number)</label>
         <label><input type="checkbox" id="showPath" checked> Show predicted path</label>
       </div>
     </div>
@@ -240,7 +240,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.14, build 2026-10-31 07:23 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.16, build 2026-11-02 07:32 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
   </div>
 </main>
 
@@ -649,6 +649,21 @@ details p{max-width:76ch;margin:10px 0}
     if (idle && $('showGuide').checked){
       const A = castAim();
       const gx = cue.x + A.dx*A.t, gy = cue.y + A.dy*A.t;
+      // cue line extended to the rail, with the diamond it points at (diamonds: long rails 0–8, short rails 0–4)
+      {
+        const tX = A.dx > 0 ? (TW - gx)/A.dx : A.dx < 0 ? -gx/A.dx : Infinity;
+        const tY = A.dy > 0 ? (TH - gy)/A.dy : A.dy < 0 ? -gy/A.dy : Infinity;
+        const tr = Math.max(0, Math.min(tX, tY)), ex = gx + A.dx*tr, ey = gy + A.dy*tr, side = tX < tY;
+        c.strokeStyle = 'rgba(255,255,255,.3)'; c.lineWidth = 1; c.setLineDash([3,6]);
+        c.beginPath(); c.moveTo(SX(gx), SY(gy)); c.lineTo(SX(ex), SY(ey)); c.stroke(); c.setLineDash([]);
+        const d = side ? ey/(TH/4) : ex/(TW/8);
+        let lbl = (Math.round(d*10)/10).toFixed(1).replace(/\.0$/, '');
+        const o = RW*0.55, lx = side ? (ex > TW/2 ? TW + o : -o) : ex, ly = side ? ey : (ey > TH/2 ? TH + o : -o);
+        c.font = '600 10px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        const tw = c.measureText(lbl).width + 8;
+        c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(SX(lx) - tw/2, SY(ly) - 7, tw, 14);
+        c.fillStyle = 'rgba(255,255,255,.9)'; c.fillText(lbl, SX(lx), SY(ly) + .5);
+      }
       c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5;
       c.beginPath(); c.moveTo(SX(cue.x), SY(cue.y)); c.lineTo(SX(gx), SY(gy)); c.stroke();
       c.beginPath(); c.arc(SX(gx), SY(gy), R*s, 0, Math.PI*2); c.stroke();
@@ -689,7 +704,9 @@ details p{max-width:76ch;margin:10px 0}
         }
       }
       if (p.score){
-        const [ex, ey] = p.path[p.path.length - 1];
+        // label above the contact with the second ball (where the point is made), not at the path end
+        const h2 = p.marks.filter(m => m.k === 'hit')[1];
+        const [ex, ey] = h2 ? [h2.x, h2.y] : p.path[p.path.length - 1];
         c.font = '700 13px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'bottom';
         c.fillStyle = 'rgba(134,239,172,1)'; c.fillText('point ✓', SX(ex), SY(ey) - R*s - 4);
       }

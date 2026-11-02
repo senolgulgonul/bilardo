@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Fizik bilardosu</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.14 (build 2026-10-31 07:23 UTC)">
+<meta name="version" content="1.16 (build 2026-11-02 07:32 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -213,7 +213,7 @@ details p{max-width:76ch;margin:10px 0}
       <h2>Oyun</h2>
       <div class="row"><button id="slowBtn" aria-pressed="false">Ağır çekim</button></div>
       <div class="checks">
-        <label><input type="checkbox" id="showGuide" checked> Nişan kılavuzu (hayalet top, 90° çizgisi)</label>
+        <label><input type="checkbox" id="showGuide" checked> Nişan kılavuzu (hayalet top, 90° çizgisi, banda uzanan ıstaka çizgisi ve elmas numarası)</label>
         <label><input type="checkbox" id="showPath" checked> Topumun gideceği yolu göster</label>
       </div>
     </div>
@@ -240,7 +240,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>3 top modunda masa 2.84 m × 1.42 m, cepsiz ve toplar 61.5 mm. Kenarlardaki elmaslar gerçek masadaki gibi eşit aralıklı; 3 bant sistemlerini (örneğin elmas sistemi) burada deneyebilirsin. Sol üstteki sayaç, ıstaka topunun kaç banda değdiğini canlı gösterir.</p>
     <p>Basitleştirmeler: ıstaka sapması (squirt), havada sekme, top–top sürtünmesi (throw) ve cep ağızlarındaki çene sekmeleri modellenmedi.</p>
   </details>
-  <footer class="credits">Fizik Bilardosu v1.14, build 2026-10-31 07:23 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
+  <footer class="credits">Fizik Bilardosu v1.16, build 2026-11-02 07:32 UTC. Şenol Gülgönül tarafından, Claude ile birlikte yapıldı.</footer>
   </div>
 </main>
 
@@ -649,6 +649,21 @@ details p{max-width:76ch;margin:10px 0}
     if (idle && $('showGuide').checked){
       const A = castAim();
       const gx = cue.x + A.dx*A.t, gy = cue.y + A.dy*A.t;
+      // cue line extended to the rail, with the diamond it points at (diamonds: long rails 0–8, short rails 0–4)
+      {
+        const tX = A.dx > 0 ? (TW - gx)/A.dx : A.dx < 0 ? -gx/A.dx : Infinity;
+        const tY = A.dy > 0 ? (TH - gy)/A.dy : A.dy < 0 ? -gy/A.dy : Infinity;
+        const tr = Math.max(0, Math.min(tX, tY)), ex = gx + A.dx*tr, ey = gy + A.dy*tr, side = tX < tY;
+        c.strokeStyle = 'rgba(255,255,255,.3)'; c.lineWidth = 1; c.setLineDash([3,6]);
+        c.beginPath(); c.moveTo(SX(gx), SY(gy)); c.lineTo(SX(ex), SY(ey)); c.stroke(); c.setLineDash([]);
+        const d = side ? ey/(TH/4) : ex/(TW/8);
+        let lbl = (Math.round(d*10)/10).toFixed(1).replace(/\.0$/, ''); lbl = lbl.replace('.', ',');
+        const o = RW*0.55, lx = side ? (ex > TW/2 ? TW + o : -o) : ex, ly = side ? ey : (ey > TH/2 ? TH + o : -o);
+        c.font = '600 10px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+        const tw = c.measureText(lbl).width + 8;
+        c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(SX(lx) - tw/2, SY(ly) - 7, tw, 14);
+        c.fillStyle = 'rgba(255,255,255,.9)'; c.fillText(lbl, SX(lx), SY(ly) + .5);
+      }
       c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5;
       c.beginPath(); c.moveTo(SX(cue.x), SY(cue.y)); c.lineTo(SX(gx), SY(gy)); c.stroke();
       c.beginPath(); c.arc(SX(gx), SY(gy), R*s, 0, Math.PI*2); c.stroke();
@@ -689,7 +704,9 @@ details p{max-width:76ch;margin:10px 0}
         }
       }
       if (p.score){
-        const [ex, ey] = p.path[p.path.length - 1];
+        // label above the contact with the second ball (where the point is made), not at the path end
+        const h2 = p.marks.filter(m => m.k === 'hit')[1];
+        const [ex, ey] = h2 ? [h2.x, h2.y] : p.path[p.path.length - 1];
         c.font = '700 13px Archivo, system-ui, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'bottom';
         c.fillStyle = 'rgba(134,239,172,1)'; c.fillText('sayı ✓', SX(ex), SY(ey) - R*s - 4);
       }

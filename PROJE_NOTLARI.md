@@ -25,6 +25,8 @@ Bu dosya, projeye devam ederken bağlamı korumak için. Yeni sohbette Claude’
 - Güç eğrisi `speedOf()`: alt ve orta güç eskisi gibi (7.35 m/s eğim), en üstte 10 m/s. Atış ve yol tahmini aynı fonksiyonu kullanır
 - İnce nişan: düğmeler 0.1°, ok tuşları 0.3°, Shift + ok 0.05°
 - Bant modeli (v1.9): bant burnu merkezin üstünde (cepli %63.5 WPA, karambol %60.2 UMB). Tek impuls: normal bileşen eC ile, temas noktasında Coulomb sürtünmesi (μ 0.14, yapışma sınırlı) üç dönme eksenini de etkiler, top zıplamaz. Eski model (sabit 0.6 yapışma, yalnız yan falso) v1.8’de; yavaşlık veya garip davranış olursa geri alınabilir. Ölçüm: yol tahmini ortalama 14 ms → 16 ms
+- Nişan kılavuzu: ıstaka doğrultusu kesikli soluk çizgiyle banda uzar, elmas numarası yazar (uzun bant 0–8, kısa bant 0–4, sol/alt köşeden). Kalınlık etiketi istenmedi. 90° çizgisi yalnız yol tahmini kapalıyken görünür
+- İleride belki: online iki kişi (PeerJS oda kodu, sadece atış verisi gönder, her atıştan sonra konum eşitle)
 - Modellenmeyenler: squirt, throw, havada sekme, cep çenesi sekmeleri
 
 ## Oyun modları

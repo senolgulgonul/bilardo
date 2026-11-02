@@ -3,6 +3,14 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.16 (2026-11-02 07:32 UTC)
+
+- The "point ✓" label sits above the contact with the second ball instead of at the end of the path, so it no longer lands on top of a ball
+
+## v1.15 (2026-11-02 07:28 UTC)
+
+- Aiming guide: a faint dashed line extends the cue line to the rail and shows the diamond it points at (long rails 0–8, short rails 0–4), so a shot found here can be aimed on a real table
+
 ## v1.14 (2026-10-31 07:23 UTC)
 
 - Phones in landscape: shorter power slider so Shoot and New game fit on screen without scrolling
