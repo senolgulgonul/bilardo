@@ -1,6 +1,6 @@
 # Physics Billiards 🎱
 
-**v1.16**, build 2026-11-02 07:32 UTC, by **Şenol Gülgönül**
+**v1.17**, build 2026-11-03 19:22 UTC, by **Şenol Gülgönül**
 
 A browser billiards game built on a real rigid-body model of ball and cloth — no game engine, no install, one HTML file.
 
