@@ -3,6 +3,26 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.22 (2026-11-04 06:46 UTC)
+
+- Default power is now 65% (5.2 m/s) instead of 45%: with a center hit the cue ball still slides when it reaches the first ball almost anywhere on the table, so paths are clean and predictable
+
+## v1.21 (2026-11-04 06:42 UTC)
+
+- Recordings as files: "Download recording" and "Load recording" below the table (Game panel). The file name has the mode and the local date and time, e.g. physics-billiards-carom-20261104-0645.json
+- Pressing ● when a game is already saved asks before overwriting it
+- Removed the live readout row under the table (cue ball speed, motion state, spin)
+
+## v1.20 (2026-11-04 06:34 UTC)
+
+- Title and version always stay on one line: the title shrinks to fit the column, whatever the font
+- Slightly shorter power slider, so the recorder buttons fit on screen on shorter laptop screens
+
+## v1.19 (2026-11-04 06:32 UTC)
+
+- Recorder: ● records every shot of a game from a fresh rack (aim, power, spin, cue ball position), ▶ replays the whole game exactly, ❚❚ pauses the balls (also during normal play), ■ stops. The last recording is kept in the browser. During a replay the shot controls are locked
+- Title and version share one line in the right column
+
 ## v1.18 (2026-11-04 06:20 UTC)
 
 - Aim readout: the cue angle is shown between the two rotate buttons (↺ 7.63° ↻), in degrees with two decimals, 0° toward the right short rail and counter-clockwise. Each button press changes it by exactly 0.1°, so a shot can be written down and repeated exactly
