@@ -3,6 +3,14 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.24 (2026-11-04 07:30 UTC)
+
+- The game now opens in carom (straight rail, three balls) instead of 8-ball
+
+## v1.23 (2026-11-04 07:28 UTC)
+
+- Physics is now identical in every browser: the engine no longer uses the browser's sin, cos, atan2, hypot and pow (they differ between Chrome, Firefox and Safari in the last digit, and billiards amplifies that). It uses its own formulas built only from +, −, ×, ÷ and square root, which are exact in every browser. Recordings and aim recipes now replay the same everywhere. Results differ from v1.22 only in the last digits, but recordings made with older versions may play differently after a few shots
+
 ## v1.22 (2026-11-04 06:46 UTC)
 
 - Default power is now 65% (5.2 m/s) instead of 45%: with a center hit the cue ball still slides when it reaches the first ball almost anywhere on the table, so paths are clean and predictable

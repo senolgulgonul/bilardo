@@ -1,6 +1,6 @@
 # Physics Billiards 🎱
 
-**v1.22**, build 2026-11-04 06:46 UTC, by **Şenol Gülgönül**
+**v1.24**, build 2026-11-04 07:30 UTC, by **Şenol Gülgönül**
 
 A browser billiards game built on a real rigid-body model of ball and cloth — no game engine, no install, one HTML file.
 
@@ -24,6 +24,7 @@ Tap or drag on the table to aim, set power with the slider, pick a contact point
 - Sliding friction μ ≈ 0.2, rolling resistance ≈ 0.01, ball–ball e ≈ 0.95, cushion e ≈ 0.75.
 - Cushion nose height 63.5% of ball diameter on the pool table (WPA), 60.2% on the carom table (UMB 37 mm); ball–cushion friction μ ≈ 0.14, one impulse per impact, no ball hop.
 - Integrated at fixed 1 ms steps for determinism.
+- Browser-independent: the physics uses only +, −, ×, ÷ and square root, which JavaScript computes bit-identically everywhere (IEEE 754). Sine, cosine, atan2 and hypot come from the engine’s own short formulas instead of the browser’s Math library, which differs between Chrome, Firefox and Safari in the last digit. So a shot, a recipe (“65 %, 7.80°”) or a recording plays out exactly the same in every browser and on every device.
 - Not modeled: squirt, throw, airborne balls, pocket jaw rattles.
 
 ## Running locally

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.22 (build 2026-11-04 06:46 UTC)">
+<meta name="version" content="1.24 (build 2026-11-04 07:30 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -188,9 +188,9 @@ details p{max-width:76ch;margin:10px 0}
 
     <div class="gamebox"><label for="mode">Mode</label>
         <select id="mode" autocomplete="off">
-          <option value="8ball" selected>8-ball, two players</option>
+          <option value="8ball">8-ball, two players</option>
           <option value="free">Free practice (pool)</option>
-          <option value="carom">Carom, straight rail</option>
+          <option value="carom" selected>Carom, straight rail</option>
           <option value="three">Carom, three-cushion</option>
         </select></div>
 
@@ -244,7 +244,7 @@ details p{max-width:76ch;margin:10px 0}
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.22, build 2026-11-04 06:46 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.24, build 2026-11-04 07:30 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
   </div>
 </main>
 
@@ -272,7 +272,26 @@ details p{max-width:76ch;margin:10px 0}
   const GROUPNAME = {solid:'Solids (1–7)', stripe:'Stripes (9–15)'};
   const fmt = (n, d) => { const t = n.toFixed(d); return /^-0\.?0*$/.test(t) ? t.slice(1) : t; };
 
-  const speedOf = pw => 0.15 + 7.35*pw + (MAXV - 7.5)*Math.pow(pw, 5);
+  /* Browser-independent math for the physics. +, -, *, / and sqrt give bit-identical results in every browser
+     (IEEE 754, required by the JavaScript standard); sin, cos, atan2, hypot and pow do not (each engine uses its
+     own library). The engine uses only the former, so a shot plays out exactly the same in every browser. */
+  const hyp2 = (x, y) => Math.sqrt(x*x + y*y), hyp3 = (x, y, z) => Math.sqrt(x*x + y*y + z*z);
+  function sinPoly(r){ const r2 = r*r; return r*(1 - r2/6*(1 - r2/20*(1 - r2/42*(1 - r2/72*(1 - r2/110*(1 - r2/156*(1 - r2/210))))))); }
+  function cosPoly(r){ const r2 = r*r; return 1 - r2/2*(1 - r2/12*(1 - r2/30*(1 - r2/56*(1 - r2/90*(1 - r2/132*(1 - r2/182*(1 - r2/240))))))); }
+  function dsc(x){                                  // [sin x, cos x]
+    const H = Math.PI/2, k = Math.round(x/H), r = x - k*H, q = ((k % 4) + 4) % 4, s = sinPoly(r), c = cosPoly(r);
+    return q === 0 ? [s, c] : q === 1 ? [c, -s] : q === 2 ? [-s, -c] : [-c, s];
+  }
+  function datan(x){                                // atan, by three angle halvings and a short series
+    if (x < 0) return -datan(-x);
+    if (x > 1) return Math.PI/2 - datan(1/x);
+    for (let i = 0; i < 3; i++) x = x/(1 + Math.sqrt(1 + x*x));
+    const x2 = x*x; let t = x, sum = x;
+    for (let n = 3; n <= 21; n += 2){ t *= -x2; sum += t/n; }
+    return 8*sum;
+  }
+  const datan2 = (y, x) => x > 0 ? datan(y/x) : x < 0 ? datan(y/x) + (y >= 0 ? Math.PI : -Math.PI) : (y > 0 ? Math.PI/2 : y < 0 ? -Math.PI/2 : 0);
+  const speedOf = pw => 0.15 + 7.35*pw + (MAXV - 7.5)*(pw*pw*pw*pw*pw);
   const PH = {};
   function readPhys(){
     PH.muS = +$('muS').value; PH.muR = +$('muR').value; PH.eC = +$('eC').value; PH.eB = +$('eB').value;
@@ -293,14 +312,14 @@ details p{max-width:76ch;margin:10px 0}
       const white = makeBall(0, TW/4, TH/2 - 0.1525), yellow = makeBall(20, TW/4, TH/2), red = makeBall(21, TW*3/4, TH/2);
       balls = [white, yellow, red]; cue = white;
       GM.turn = 0; GM.scores = [0, 0]; GM.groups = [null, null]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false; GM.caromBreak = true;
-      aimA = Math.atan2(red.y - white.y, red.x - white.x); moving = false; trail = [];
+      aimA = datan2(red.y - white.y, red.x - white.x); moving = false; trail = [];
       setStatus((GM.mode === 'three' ? 'Three-cushion' : 'Carom') + ': Player 1 plays white, Player 2 yellow. To score, your ball must hit both other balls' +
         (GM.mode === 'three' ? ', touching at least 3 cushions before the second one.' : '.') + ' First to ' + TARGET[GM.mode] + ' wins. The opening shot must hit the red ball directly, with no cushion first.');
       renderPlayers(); updateButtons(); return;
     }
     cue = makeBall(0, TW/4, TH/2); balls.push(cue);
     const rows = [[1],[9,2],[10,8,3],[11,7,14,4],[5,13,15,6,12]];
-    const fx = TW*3/4, dx = 2*R*Math.cos(Math.PI/6)*1.002, dy = 2*R*1.002;
+    const fx = TW*3/4, dx = 2*R*dsc(Math.PI/6)[1]*1.002, dy = 2*R*1.002;
     rows.forEach((row, i) => row.forEach((n, j) => balls.push(makeBall(n, fx + i*dx, TH/2 + (j - i/2)*dy))));
     GM.turn = 0; GM.groups = [null, null]; GM.over = false;
     GM.isBreak = true; GM.inHand = true; GM.kitchen = true;
@@ -312,13 +331,13 @@ details p{max-width:76ch;margin:10px 0}
 
   /* ---------- fizik ---------- */
   function stepBall(b, dt){
-    const ux = b.vx - R*b.wy, uy = b.vy + R*b.wx, un = Math.hypot(ux, uy);
+    const ux = b.vx - R*b.wy, uy = b.vy + R*b.wx, un = hyp2(ux, uy);
     if (un > 3.5*PH.muS*G*dt){
       const kx = ux/un, ky = uy/un, a = PH.muS*G*dt, k = 5*PH.muS*G/(2*R)*dt;
       b.vx -= a*kx; b.vy -= a*ky; b.wx -= k*ky; b.wy += k*kx;
       b.state = 'slide';
     } else {
-      const sp = Math.hypot(b.vx, b.vy), d = PH.muR*G*dt;
+      const sp = hyp2(b.vx, b.vy), d = PH.muR*G*dt;
       if (sp > d){ b.vx -= d*b.vx/sp; b.vy -= d*b.vy/sp; b.state = 'roll'; }
       else { b.vx = 0; b.vy = 0; b.state = 'stop'; }
       b.wy = b.vx/R; b.wx = -b.vy/R;
@@ -340,7 +359,7 @@ details p{max-width:76ch;margin:10px 0}
     const rx = -R*C*nx, ry = -R*C*ny, rz = R*S;                       // contact point from ball center
     const ux = b.vx + b.wy*rz - b.wz*ry, uy = b.vy + b.wz*rx - b.wx*rz, uz = b.wx*ry - b.wy*rx;
     const Nx = C*nx, Ny = C*ny, Nz = -S, uN = ux*Nx + uy*Ny + uz*Nz;  // contact normal, into the ball
-    const tx = ux - uN*Nx, ty = uy - uN*Ny, tz = uz - uN*Nz, ut = Math.hypot(tx, ty, tz);
+    const tx = ux - uN*Nx, ty = uy - uN*Ny, tz = uz - uN*Nz, ut = hyp3(tx, ty, tz);
     const JN = (1 + PH.eC)*(-vn)/C;                                   // normal impulse per unit mass
     b.vx += JN*C*nx; b.vy += JN*C*ny;
     if (ut > 1e-9){
@@ -361,7 +380,7 @@ details p{max-width:76ch;margin:10px 0}
 
   function pockets(b){
     let pot = b.x < -1.5*R || b.x > TW + 1.5*R || b.y < -1.5*R || b.y > TH + 1.5*R;
-    if (!pot) for (const p of POCKETS) if (Math.hypot(b.x - p.x, b.y - p.y) < p.r){ pot = true; break; }
+    if (!pot) for (const p of POCKETS) if (hyp2(b.x - p.x, b.y - p.y) < p.r){ pot = true; break; }
     if (pot){ b.on = false; b.vx = b.vy = b.wx = b.wy = b.wz = 0; b.state = 'stop'; if (shot) shot.potted.push(b.n); }
   }
 
@@ -372,7 +391,7 @@ details p{max-width:76ch;margin:10px 0}
         const b = balls[j]; if (!b.on) continue;
         const dx = b.x - a.x, dy = b.y - a.y;
         if (Math.abs(dx) > 2*R || Math.abs(dy) > 2*R) continue;
-        const d = Math.hypot(dx, dy); if (d >= 2*R || d < 1e-12) continue;
+        const d = hyp2(dx, dy); if (d >= 2*R || d < 1e-12) continue;
         const nx = dx/d, ny = dy/d, ov = (2*R - d)/2;
         a.x -= nx*ov; a.y -= ny*ov; b.x += nx*ov; b.y += ny*ov;
         const rel = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny;
@@ -399,7 +418,7 @@ details p{max-width:76ch;margin:10px 0}
   }
 
   function allStopped(){
-    return balls.every(b => !b.on || (b.vx === 0 && b.vy === 0 && Math.hypot(b.vx - R*b.wy, b.vy + R*b.wx) < 1e-9));
+    return balls.every(b => !b.on || (b.vx === 0 && b.vy === 0 && hyp2(b.vx - R*b.wy, b.vy + R*b.wx) < 1e-9));
   }
 
   /* ---------- atış ve kurallar ---------- */
@@ -409,7 +428,7 @@ details p{max-width:76ch;margin:10px 0}
     if (moving || GM.over || !cue.on) return;
     recordShot();
     const pw = +$('power').value/100, v0 = speedOf(pw);
-    const dx = Math.cos(aimA), dy = Math.sin(aimA);
+    const [dy, dx] = dsc(aimA);
     const Om = 5*v0*spinY/(2*R);
     cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
     const g = GM.groups[GM.turn];
@@ -422,7 +441,7 @@ details p{max-width:76ch;margin:10px 0}
   function freeSpot(x, y, dirx){
     let px = x;
     for (let k = 0; k < 200; k++){
-      if (balls.every(b => !b.on || Math.hypot(b.x - px, b.y - y) >= 2*R + 0.001)) return px;
+      if (balls.every(b => !b.on || hyp2(b.x - px, b.y - y) >= 2*R + 0.001)) return px;
       px += dirx*0.01;
     }
     return x;
@@ -606,7 +625,7 @@ details p{max-width:76ch;margin:10px 0}
     const sB = balls, sC = cue, sS = shot, sT = trail, sTT = trailT;
     balls = sB.map(b => Object.assign({}, b)); cue = balls[sB.indexOf(sC)];
     trail = []; trailT = 0;
-    const pw = +$('power').value/100, v0 = speedOf(pw), dx = Math.cos(aimA), dy = Math.sin(aimA), Om = 5*v0*spinY/(2*R);
+    const pw = +$('power').value/100, v0 = speedOf(pw), [dy, dx] = dsc(aimA), Om = 5*v0*spinY/(2*R);
     cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
     shot = {first:null, potted:[], hits:[], cush:0, cueBall:cue};
     const path = [[cue.x, cue.y]], marks = [], opath = []; let nh = 0, nc = 0, ob = null, obDone = false, cueDone = false;
