@@ -3,6 +3,10 @@
 All notable changes to Physics Billiards are listed here.
 Versioning: MAJOR.MINOR (e.g. 1.1 for new features, 2.0 for big changes).
 
+## v1.18 (2026-11-04 06:20 UTC)
+
+- Aim readout: the cue angle is shown between the two rotate buttons (↺ 7.63° ↻), in degrees with two decimals, 0° toward the right short rail and counter-clockwise. Each button press changes it by exactly 0.1°, so a shot can be written down and repeated exactly
+
 ## v1.17 (2026-11-03 19:22 UTC)
 
 - Fix (carom and three-cushion opening rule): the opening shot must hit the red ball directly, with no cushion before it (UMB world rules art. 23.3, USBA). Before, a cushion-first shot that reached the red before the yellow was wrongly counted as legal. The predicted path's "point ✓" follows the same rule
