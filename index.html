@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Physics billiards</title>
 <meta name="author" content="Şenol Gülgönül">
-<meta name="version" content="1.24 (build 2026-11-04 07:30 UTC)">
+<meta name="version" content="1.40 (build 2026-11-07 13:20 UTC)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -59,6 +59,7 @@ h1{white-space:nowrap;overflow:hidden;font-size:1.05rem;line-height:1.15;margin:
 .shotbar output{font-variant-numeric:tabular-nums;font-weight:600;font-size:.75rem}
 #power{writing-mode:vertical-lr;direction:rtl;width:34px;height:clamp(100px,24vh,300px);margin:0}
 .pwbox{display:contents}
+.pwrow{display:flex;align-items:center;justify-content:center;gap:14px;width:100%}
 .recbar{display:flex;gap:4px;width:100%}
 .recbar button{flex:1;padding:5px 0;font-size:.85rem;line-height:1}
 #recBtn{color:#d32f2f}
@@ -83,6 +84,8 @@ h1{white-space:nowrap;overflow:hidden;font-size:1.05rem;line-height:1.15;margin:
   .gamebox select{flex:1;width:auto;min-width:160px}
   .shotbar{flex-direction:row;flex-wrap:wrap;background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:10px 14px}
   #power{writing-mode:horizontal-tb;direction:ltr;width:auto;height:auto;flex:1;min-width:150px}
+  .pwrow{flex:1 1 260px;width:auto}
+  .pwrow #spin{width:64px;height:64px}
   .shotbar output{min-width:8.5em}
   .fine{width:auto}
   .fine button{padding:9px 10px}
@@ -109,6 +112,8 @@ h1{white-space:nowrap;overflow:hidden;font-size:1.05rem;line-height:1.15;margin:
   .shotbar .pwlab{font-size:.72rem}
   #power{writing-mode:vertical-lr;direction:rtl;width:30px;height:clamp(56px,18vh,110px);height:clamp(56px,18dvh,110px);flex:none;min-width:0}
   .shotbar output{min-width:0;font-size:.65rem}
+  .pwrow{gap:6px}
+  .pwrow #spin{width:52px;height:52px}
   .fine{width:100%}
   .fine button{padding:5px 0;font-size:.9rem}
   .fine output{font-size:.72rem}
@@ -140,7 +145,7 @@ h1{white-space:nowrap;overflow:hidden;font-size:1.05rem;line-height:1.15;margin:
 .panel{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:16px}
 .panel h2{font-size:1rem;margin:0 0 12px;font-weight:600}
 .shot{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start}
-#spin{width:120px;height:120px;display:block;touch-action:none;cursor:pointer}
+#spin{width:84px;height:84px;display:block;touch-action:none;cursor:pointer;flex:none}
 .spinTxt{font-size:.82rem;color:var(--muted);text-align:center;margin-top:4px}
 .ctl{margin-bottom:12px}
 .ctl label{display:flex;justify-content:space-between;align-items:baseline;font-size:.92rem;margin-bottom:4px}
@@ -177,7 +182,7 @@ details p{max-width:76ch;margin:10px 0}
 
     <aside class="shotbar">
       <label for="power" class="pwlab">Power</label>
-      <div class="pwbox"><input type="range" id="power" min="3" max="100" step="1" value="65"></div>
+      <div class="pwrow"><div class="pwbox"><input type="range" id="power" min="3" max="100" step="1" value="65" autocomplete="off"></div><canvas id="spin" aria-label="Where the cue tip strikes the ball. Click to set follow, draw and side spin." title="Contact point: click or drag"></canvas></div>
       <output id="oPow"></output>
       <div class="fine"><button id="aimL" aria-label="Rotate aim 0.1° counter-clockwise" title="0.1° counter-clockwise">↺</button><output id="oAim"></output><button id="aimR" aria-label="Rotate aim 0.1° clockwise" title="0.1° clockwise">↻</button></div>
       <button id="shoot">Shoot</button>
@@ -204,34 +209,31 @@ details p{max-width:76ch;margin:10px 0}
     <div class="panel">
       <h2>Spin and contact point</h2>
       <div class="shot">
-        <div>
-          <canvas id="spin" aria-label="Where the cue tip strikes the ball. Click to set follow, draw and side spin."></canvas>
-          <div class="spinTxt" id="spinTxt">center hit</div>
-        </div>
-        <p class="note" style="margin:0">The red dot is where the cue tip hits the ball. Hit high for follow, low for draw, off-center for side spin (english). The dashed ring is the miscue limit.<br><br>Tap or drag on the table to aim. Arrow keys fine-tune, space shoots.</p>
+        <div class="spinTxt" id="spinTxt" hidden>center hit</div>
+        <p class="note" style="margin:0">The red dot on the ball beside the power slider is where the cue tip hits the ball. Hit high for follow, low for draw, off-center for side spin (english). The dashed ring is the miscue limit.<br><br>Tap or drag on the table to aim. Arrow keys fine-tune, space shoots.</p>
       </div>
     </div>
 
     <div class="panel">
       <h2>Game</h2>
       <div class="row"><button id="slowBtn" aria-pressed="false">Slow motion</button></div>
-      <div class="row"><button id="recSave">Download recording</button><button id="recLoad">Load recording</button><input type="file" id="recFile" accept=".json,application/json" hidden></div>
+      <div class="row"><button id="recSave">Download recording</button><button id="recLoad">Load recording</button><input type="file" id="recFile" accept=".json,application/json" hidden autocomplete="off"></div>
       <div class="checks">
-        <label><input type="checkbox" id="showGuide" checked> Aiming guide (ghost ball, 90° line, cue line to the rail with diamond number)</label>
-        <label><input type="checkbox" id="showPath" checked> Show predicted path</label>
+        <label><input type="checkbox" id="showGuide" checked autocomplete="off"> Aiming guide (ghost ball, 90° line, cue line to the rail with diamond number)</label>
+        <label><input type="checkbox" id="showPath" checked autocomplete="off"> Show predicted path</label>
       </div>
     </div>
 
     <div class="panel">
       <h2>Physics settings</h2>
       <div class="ctl"><label for="muS">Sliding friction μ <output id="oMuS"></output></label>
-        <input type="range" id="muS" min="0.05" max="0.35" step="0.01" value="0.2"></div>
+        <input type="range" id="muS" min="0.05" max="0.35" step="0.01" value="0.2" autocomplete="off"></div>
       <div class="ctl"><label for="muR">Rolling resistance <output id="oMuR"></output></label>
-        <input type="range" id="muR" min="0.002" max="0.03" step="0.001" value="0.01"></div>
+        <input type="range" id="muR" min="0.002" max="0.03" step="0.001" value="0.01" autocomplete="off"></div>
       <div class="ctl"><label for="eC">Cushion restitution <output id="oEC"></output></label>
-        <input type="range" id="eC" min="0.4" max="0.95" step="0.01" value="0.75"></div>
+        <input type="range" id="eC" min="0.4" max="0.95" step="0.01" value="0.75" autocomplete="off"></div>
       <div class="ctl"><label for="eB">Ball–ball restitution <output id="oEB"></output></label>
-        <input type="range" id="eB" min="0.8" max="1" step="0.01" value="0.95"></div>
+        <input type="range" id="eB" min="0.8" max="1" step="0.01" value="0.95" autocomplete="off"></div>
     </div>
   </div>
 
@@ -241,10 +243,11 @@ details p{max-width:76ch;margin:10px 0}
     <p>Hitting high gives topspin (follow), hitting low gives backspin (draw). On a full hit the cue ball hands over most of its forward speed but keeps its spin; friction turns that spin back into motion, so the ball follows forward or draws back. None of this is scripted: it falls out of the physics.</p>
     <p>With equal masses, a stun (sliding) hit sends the two balls off at 90° to each other. Side spin changes the rebound angle off a cushion, because cushion friction couples the sidespin with the tangential speed.</p>
     <p>Cushions touch the ball above its center, as on real tables: 63.5% of the ball height on the pool table (WPA) and 60.2% on the carom table (UMB, 37 mm). The impact therefore also changes follow and draw, so a ball coming off a cushion slides briefly and its path bends a little before it rolls again.</p>
+    <p>The carom table is calibrated on a real match, the 2019 World Championship quarter-final Tran–Sayginer, tracked frame by frame in the overhead broadcast, one link of the chain at a time. Cue stroke and cloth: from the moment the cue strikes until the first contact the engine follows the real cue ball to 0.2–1.7 mm and its speed to 1–3 % (14 shots; sliding friction 0.20, rolling resistance 0.005 from 75 free rolls). Ball–ball impact: restitution 0.98 with a small speed-dependent friction (“throw”, after Alciatore and Marlow), both confirmed on 34 collisions measured directly in the video; a ball set moving from rest also loses a fixed 0.033 m/s, whatever the speed of the impact, as it sits slightly in the cloth. Cushions: the ball touches the cushion above its centre and the cloth below it at the same time, and both contacts act together during the impact (the two-contact model of Mathavan, Jackson and Parkin, 2010), with the official 37 mm nose, restitution 0.90 and cushion friction 0.20; on 24 cushion hits of object balls measured in the video it shows no systematic error in the speed or the direction the ball rolls away with (the earlier single-impulse cushion sent balls away about 3° too wide). The default break is Tran Quyet Chien’s, with the table laid out as in the overhead broadcast (red on the left, the cue ball 18.25 cm beside the spot ball as the rules require): the measured speed, and aim, english and follow fitted to all three balls’ tracked paths (188.27°, 0.19 right, 0.39 follow; the direct measurements were 188.37°, 0.21 and 0.335). Over fifteen seconds the engine follows the three balls to 5 cm on average; the white and the yellow stop within 1 and 3 cm of where they stopped in the match. The pool table keeps restitution 0.75, cushion friction 0.14, rolling resistance 0.010 and the WPA nose height, as no pool data was measured.</p>
     <p>Carom modes use a pocketless 2.84 m × 1.42 m table with 61.5 mm balls. The diamonds are spaced like on a real table, so you can try three-cushion diamond systems. The counter in the top-left shows cushion contacts live.</p><p>The predicted path is not an approximation: the shot is simulated ahead of time with the same fixed-step engine, so the real shot follows it exactly.</p>
     <p>Not modeled: squirt (cue ball deflection), airborne balls, throw (ball–ball friction) and pocket jaw rattles.</p>
   </details>
-  <footer class="credits">Physics Billiards v1.24, build 2026-11-04 07:30 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
+  <footer class="credits">Physics Billiards v1.40, build 2026-11-07 13:20 UTC. Made by Şenol Gülgönül, built together with Claude.</footer>
   </div>
 </main>
 
@@ -260,11 +263,19 @@ details p{max-width:76ch;margin:10px 0}
     {x:-0.006,y:TH+0.006,r:0.06},{x:TW/2,y:TH+0.012,r:0.05},{x:TW+0.006,y:TH+0.006,r:0.06}];
   let POCKETS = POOL_POCKETS;
   const isCarom = () => GM.mode === 'carom' || GM.mode === 'three';
-  let CUSH_H = 0.635; const MU_C = 0.14;  // ball–cushion friction
+  let CUSH_H = 0.635; let MU_C = 0.14;  // ball–cushion friction
+  let START_LOSS = 0;
+  let TWO_CONTACT = false;   // carom: cushion and cloth contacts act together during a cushion impact (Mathavan et al. 2010)   // speed lost by a resting ball when another ball sets it moving (it sits slightly in the cloth)
+  // Cushion defaults per table type. Carom: two-contact impact (cushion and cloth act together, Mathavan et al. 2010)
+  // with the official 37 mm nose (UMB, Kleber P37), restitution 0.90 and cushion friction 0.20, fitted on 24 object-ball
+  // cushion hits of a tracked world-championship match. Pool: single impulse, 0.75, 0.14, 0.635 (WPA, not calibrated).
+  // The restitution default is applied only when the table type changes, so a user's own setting survives New game.
+  let lastCarom = null;
   function setTable(carom){
+    if (carom !== lastCarom){ $('eC').value = carom ? 0.90 : 0.75; $('eB').value = carom ? 0.98 : 0.95; $('muR').value = carom ? 0.005 : 0.010; lastCarom = carom; if (typeof readPhys === 'function') readPhys(); }
     // CUSH_H: cushion nose height as a fraction of the ball diameter (UMB 37 mm / 61.5 mm; WPA 63.5 %)
-    if (carom){ TW = 2.84; TH = 1.42; R = 0.03075; POCKETS = []; CUSH_H = 0.602; }
-    else { TW = 2.54; TH = 1.27; R = 0.028575; POCKETS = POOL_POCKETS; CUSH_H = 0.635; }
+    if (carom){ TW = 2.84; TH = 1.42; R = 0.03075; POCKETS = []; CUSH_H = 0.602; MU_C = 0.20; START_LOSS = 0.033; TWO_CONTACT = true; }
+    else { TW = 2.54; TH = 1.27; R = 0.028575; POCKETS = POOL_POCKETS; CUSH_H = 0.635; MU_C = 0.14; START_LOSS = 0; TWO_CONTACT = false; }
   }
   const COL = {0:'#F4F1E8',1:'#F2C230',2:'#1D4ED8',3:'#C62828',4:'#6B21A8',5:'#EA6A0A',6:'#15803D',7:'#7F1D1D',8:'#16181A'};
   const colorOf = n => n === 20 ? '#F2C230' : n === 21 ? '#C62828' : n > 8 ? COL[n-8] : COL[n];
@@ -275,6 +286,12 @@ details p{max-width:76ch;margin:10px 0}
   /* Browser-independent math for the physics. +, -, *, / and sqrt give bit-identical results in every browser
      (IEEE 754, required by the JavaScript standard); sin, cos, atan2, hypot and pow do not (each engine uses its
      own library). The engine uses only the former, so a shot plays out exactly the same in every browser. */
+  function dexp(x){                                   // e^x with + - * / only (browser-independent)
+    const LN2 = 0.6931471805599453; let k = Math.round(x/LN2), r = x - k*LN2, t = 1, sum = 1;
+    for (let n = 1; n < 18; n++){ t *= r/n; sum += t; }
+    if (k > 0) for (let i = 0; i < k; i++) sum *= 2; else for (let i = 0; i < -k; i++) sum /= 2;
+    return sum;
+  }
   const hyp2 = (x, y) => Math.sqrt(x*x + y*y), hyp3 = (x, y, z) => Math.sqrt(x*x + y*y + z*z);
   function sinPoly(r){ const r2 = r*r; return r*(1 - r2/6*(1 - r2/20*(1 - r2/42*(1 - r2/72*(1 - r2/110*(1 - r2/156*(1 - r2/210))))))); }
   function cosPoly(r){ const r2 = r*r; return 1 - r2/2*(1 - r2/12*(1 - r2/30*(1 - r2/56*(1 - r2/90*(1 - r2/132*(1 - r2/182*(1 - r2/240))))))); }
@@ -295,6 +312,7 @@ details p{max-width:76ch;margin:10px 0}
   const PH = {};
   function readPhys(){
     PH.muS = +$('muS').value; PH.muR = +$('muR').value; PH.eC = +$('eC').value; PH.eB = +$('eB').value;
+    PH.muBB = -1;     // ball–ball friction (throw): speed-dependent model (negative = scale of the Alciatore & Marlow curve)
     $('oMuS').textContent = PH.muS.toFixed(2); $('oMuR').textContent = PH.muR.toFixed(3);
     $('oEC').textContent = PH.eC.toFixed(2); $('oEB').textContent = PH.eB.toFixed(2);
   }
@@ -309,10 +327,12 @@ details p{max-width:76ch;margin:10px 0}
     balls = []; shot = null;
     GM.mode = $('mode').value; setTable(isCarom()); fit();
     if (isCarom()){
-      const white = makeBall(0, TW/4, TH/2 - 0.1525), yellow = makeBall(20, TW/4, TH/2), red = makeBall(21, TW*3/4, TH/2);
+      const white = makeBall(0, TW*3/4, TH/2 + 0.1825), yellow = makeBall(20, TW*3/4, TH/2), red = makeBall(21, TW/4, TH/2);   // as seen in the overhead broadcast: red on the left
       balls = [white, yellow, red]; cue = white;
       GM.turn = 0; GM.scores = [0, 0]; GM.groups = [null, null]; GM.over = false; GM.inHand = false; GM.kitchen = false; GM.isBreak = false; GM.caromBreak = true;
-      aimA = datan2(red.y - white.y, red.x - white.x); moving = false; trail = [];
+      aimA = 188.267*Math.PI/180;   // the break Tran Quyet Chien played (World Championship 2019, tracked from video)
+      $('power').value = 37; powLabel(); spinX = 0.192; spinY = 0.392; drawSpin();   // aim, english and follow fitted to the three balls' tracked paths over 15 s (speed as measured)
+      moving = false; trail = [];
       setStatus((GM.mode === 'three' ? 'Three-cushion' : 'Carom') + ': Player 1 plays white, Player 2 yellow. To score, your ball must hit both other balls' +
         (GM.mode === 'three' ? ', touching at least 3 cushions before the second one.' : '.') + ' First to ' + TARGET[GM.mode] + ' wins. The opening shot must hit the red ball directly, with no cushion first.');
       renderPlayers(); updateButtons(); return;
@@ -355,6 +375,7 @@ details p{max-width:76ch;margin:10px 0}
     const vn = b.vx*nx + b.vy*ny;
     if (vn >= 0) return;
     if (shot && b === shot.cueBall) shot.cush++;
+    if (TWO_CONTACT){ cushionTwoContact(b, nx, ny, {e: PH.eC, muW: MU_C, muS: PH.muS}); return; }
     const S = 2*CUSH_H - 1, C = Math.sqrt(1 - S*S);
     const rx = -R*C*nx, ry = -R*C*ny, rz = R*S;                       // contact point from ball center
     const ux = b.vx + b.wy*rz - b.wz*ry, uy = b.vy + b.wz*rx - b.wx*rz, uz = b.wx*ry - b.wy*rx;
@@ -368,6 +389,46 @@ details p{max-width:76ch;margin:10px 0}
       const k = 1/(0.4*R*R);                                          // m/I for a solid sphere
       b.wx += k*(ry*fz - rz*fy); b.wy += k*(rz*fx - rx*fz); b.wz += k*(rx*fy - ry*fx);
     }
+  }
+
+  // Two-contact cushion impact (after Mathavan, Jackson & Parkin 2010): the ball touches the cushion above its centre
+  // and the cloth below it at the same time. The impact is followed in small steps of normal impulse at the cushion;
+  // the cloth's normal impulse keeps the ball on the table; Coulomb friction acts at both contacts on their own slips.
+  // Compression ends when the cushion contact stops approaching; restitution is energetic (Stronge): the rebound phase
+  // returns e² of the work done in compression.
+  function cushionTwoContact(b, nx, ny, P){
+    const e = P.e, muW = P.muW, muS = P.muS, S = 2*CUSH_H - 1, C = Math.sqrt(1 - S*S);
+    const rIx = -R*C*nx, rIy = -R*C*ny, rIz = R*S;           // cushion contact from the centre
+    const NIx = C*nx, NIy = C*ny, NIz = -S;                   // cushion normal, into the ball
+    const kI = 1/(0.4*R*R);
+    let vx = b.vx, vy = b.vy, vz = 0, wx = b.wx, wy = b.wy, wz = b.wz;
+    const vn0 = -(vx*NIx + vy*NIy);                          // approach speed along the normal (>0)
+    if (vn0 <= 0) return;
+    const steps = 600, dP = (1 + e)*vn0/steps*1.6;          // small normal-impulse steps
+    let Wc = 0, Wr = 0, phase = 0;
+    for (let i = 0; i < 5*steps; i++){
+      // slip at the cushion contact
+      const uIx = vx + wy*rIz - wz*rIy, uIy = vy + wz*rIx - wx*rIz, uIz = vz + wx*rIy - wy*rIx;
+      const un = uIx*NIx + uIy*NIy + uIz*NIz;                // >0 separating (N points into the ball)
+      if (phase === 0 && un >= 0) phase = 1;
+      if (phase === 0) Wc += -un*dP; else { Wr += un*dP; if (Wr >= e*e*Wc) break; }
+      const tx = uIx - un*NIx, ty = uIy - un*NIy, tz = uIz - un*NIz, ut = hyp3(tx, ty, tz);
+      let fIx = 0, fIy = 0, fIz = 0;
+      if (ut > 1e-6){ const f = Math.min(muW*dP, ut/3.5); fIx = -f*tx/ut; fIy = -f*ty/ut; fIz = -f*tz/ut; }
+      // cloth normal impulse: keeps vz = 0
+      const dPC = Math.max(0, -(dP*NIz + fIz));
+      // slip at the cloth contact (point -R z)
+      const uCx = vx - R*wy, uCy = vy + R*wx, uC = hyp2(uCx, uCy);
+      let fCx = 0, fCy = 0;
+      if (uC > 1e-6){ const f = Math.min(muS*dPC, uC/3.5); fCx = -f*uCx/uC; fCy = -f*uCy/uC; }
+      const Jx = dP*NIx + fIx, Jy = dP*NIy + fIy, Jz = dP*NIz + fIz;
+      vx += Jx + fCx; vy += Jy + fCy;
+      // torques: cushion force at rI, cloth friction at (0,0,-R)
+      wx += kI*(rIy*Jz - rIz*Jy) + kI*(R*fCy);
+      wy += kI*(rIz*Jx - rIx*Jz) + kI*(-R*fCx);
+      wz += kI*(rIx*Jy - rIy*Jx);
+    }
+    b.vx = vx; b.vy = vy; b.wx = wx; b.wy = wy; b.wz = wz;
   }
 
   function rails(b){
@@ -396,8 +457,32 @@ details p{max-width:76ch;margin:10px 0}
         a.x -= nx*ov; a.y -= ny*ov; b.x += nx*ov; b.y += ny*ov;
         const rel = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny;
         if (rel < 0){
+          const restA = hyp2(a.vx, a.vy) < 0.005, restB = hyp2(b.vx, b.vy) < 0.005;
           const J = -(1 + PH.eB)/2*rel;
           a.vx -= J*nx; a.vy -= J*ny; b.vx += J*nx; b.vy += J*ny;
+          // ball–ball friction ("throw"): the contact surfaces slide on each other; friction opposes the slip,
+          // limited to muBB × normal impulse and to what stops the slip (per unit mass: 1/m + R²/I = 7/2 per ball)
+          if (PH.muBB !== 0){
+            const rx = R*nx, ry = R*ny;                                   // contact point seen from a (from b: -r)
+            const sx = (a.vx - a.wz*ry) - (b.vx + b.wz*ry),
+                  sy = (a.vy + a.wz*rx) - (b.vy - b.wz*rx),
+                  sz = (a.wx*ry - a.wy*rx) - (-b.wx*ry + b.wy*rx);
+            const sn = sx*nx + sy*ny, tx = sx - sn*nx, ty = sy - sn*ny, tz = sz, st = Math.sqrt(tx*tx + ty*ty + tz*tz);
+            if (st > 1e-9){
+              // friction falls with the sliding speed at the contact (Alciatore & Marlow): 0.097 at 0.2 m/s, 0.022 at 2 m/s
+              const muE = PH.muBB > 0 ? PH.muBB : -PH.muBB*(0.00995 + 0.108*dexp(-1.088*st));
+              const Jt = Math.min(muE*J, st/7), fx = -Jt*tx/st, fy = -Jt*ty/st, fz = -Jt*tz/st;   // impulse on a
+              const k = 5/(2*R*R);
+              a.vx += fx; a.vy += fy; b.vx -= fx; b.vy -= fy;
+              a.wx += k*(ry*fz); a.wy += k*(-rx*fz); a.wz += k*(rx*fy - ry*fx);
+              b.wx += k*(ry*fz); b.wy += k*(-rx*fz); b.wz += k*(rx*fy - ry*fx);   // r_b = -r, f_b = -f: same torque
+            }
+          }
+          // a ball set moving from rest loses a fixed amount of speed (measured on the tracked match: 0.033 m/s at all speeds)
+          if (START_LOSS > 0) for (const [q, was] of [[a, restA], [b, restB]]){
+            const v = hyp2(q.vx, q.vy);
+            if (was && v > 0){ const f = Math.max(0, 1 - START_LOSS/v); q.vx *= f; q.vy *= f; }
+          }
           const cb = shot && shot.cueBall;
           if (cb && (a === cb || b === cb)){
             const o = a === cb ? b : a;
@@ -430,7 +515,7 @@ details p{max-width:76ch;margin:10px 0}
     const pw = +$('power').value/100, v0 = speedOf(pw);
     const [dy, dx] = dsc(aimA);
     const Om = 5*v0*spinY/(2*R);
-    cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
+    cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = 5*v0*spinX/(2*R);   // tip right of centre (spinX > 0) -> counter-clockwise from above = right english
     const g = GM.groups[GM.turn];
     shot = {first:null, potted:[], hits:[], cush:0, cueBall:cue, clearedBefore: !isCarom() && !!g && groupCleared(g)};
     acc = 0; moving = true; GM.inHand = false; trail = [[cue.x, cue.y]];
@@ -453,6 +538,7 @@ details p{max-width:76ch;margin:10px 0}
     for (const b of balls) b.wz = 0;
     if (isCarom()){
       const s = shot, me = GM.turn, two = s.hits.length >= 2, redFirst = !GM.caromBreak || (s.hits.length > 0 && s.hits[0].n === 21 && s.hits[0].cush === 0);   // UMB 23.3: direct attack on the red
+      if (GM.caromBreak){ $('power').value = 65; powLabel(); spinX = 0; spinY = 0; drawSpin(); }   // back to the usual settings after the break
       GM.caromBreak = false;
       const ok = two && redFirst && (GM.mode === 'carom' || s.hits[1].cush >= 3);
       const name = n => n === 0 ? 'white' : n === 20 ? 'yellow' : 'red';
@@ -626,7 +712,7 @@ details p{max-width:76ch;margin:10px 0}
     balls = sB.map(b => Object.assign({}, b)); cue = balls[sB.indexOf(sC)];
     trail = []; trailT = 0;
     const pw = +$('power').value/100, v0 = speedOf(pw), [dy, dx] = dsc(aimA), Om = 5*v0*spinY/(2*R);
-    cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = -5*v0*spinX/(2*R);
+    cue.vx = v0*dx; cue.vy = v0*dy; cue.wx = -Om*dy; cue.wy = Om*dx; cue.wz = 5*v0*spinX/(2*R);   // tip right of centre (spinX > 0) -> counter-clockwise from above = right english
     shot = {first:null, potted:[], hits:[], cush:0, cueBall:cue};
     const path = [[cue.x, cue.y]], marks = [], opath = []; let nh = 0, nc = 0, ob = null, obDone = false, cueDone = false;
     for (let i = 1; i <= 9000; i++){
@@ -808,8 +894,8 @@ details p{max-width:76ch;margin:10px 0}
   /* ---------- falso seçici ---------- */
   const sc = $('spin'), sctx = sc.getContext('2d');
   function drawSpin(){
-    const dpr = window.devicePixelRatio || 1, S = 120;
-    sc.width = S*dpr; sc.height = S*dpr; sctx.setTransform(dpr,0,0,dpr,0,0);
+    const dpr = window.devicePixelRatio || 1, S = sc.clientWidth || 120;   // drawn in a 120-unit box, scaled to the displayed size
+    sc.width = Math.round(S*dpr); sc.height = Math.round(S*dpr); sctx.setTransform(dpr*S/120,0,0,dpr*S/120,0,0);
     const cx = 60, cy = 60, r = 52;
     const gr = sctx.createRadialGradient(cx - 15, cy - 18, 5, cx, cy, r);
     gr.addColorStop(0, '#FFFFFF'); gr.addColorStop(1, '#C9C6BC');
@@ -827,7 +913,8 @@ details p{max-width:76ch;margin:10px 0}
   }
   function setSpin(e){
     const r = sc.getBoundingClientRect();
-    let x = (e.clientX - r.left - 60)/52, y = -(e.clientY - r.top - 60)/52;
+    const k = 120/(r.width || 120);
+    let x = ((e.clientX - r.left)*k - 60)/52, y = -((e.clientY - r.top)*k - 60)/52;
     const m = Math.hypot(x, y); if (m > 0.5){ x *= 0.5/m; y *= 0.5/m; }
     if (m < 0.06){ x = 0; y = 0; }
     spinX = x; spinY = y; drawSpin();
@@ -892,7 +979,8 @@ details p{max-width:76ch;margin:10px 0}
     if (!rec || !rec.shots || !rec.shots.length || playing || recOn) return;
     playing = true; paused = false;
     ['muS','muR','eC','eB'].forEach((id, k) => { $(id).value = rec.ph[k]; }); readPhys();
-    $('mode').value = rec.mode; rack(); updateButtons();
+    $('mode').value = rec.mode; rack();
+    ['muS','muR','eC','eB'].forEach((id, k) => { $(id).value = rec.ph[k]; }); readPhys(); updateButtons();
     const n = rec.shots.length;
     for (let i = 0; i < n && playing; i++){
       const s = rec.shots[i];
@@ -975,6 +1063,7 @@ details p{max-width:76ch;margin:10px 0}
   }
 
   readPhys(); powLabel(); drawSpin(); rack(); updateButtons();
+  new ResizeObserver(() => drawSpin()).observe(sc);
   new ResizeObserver(fit).observe(document.body); window.addEventListener('resize', fit); fit();
   $('ver').textContent = 'v' + document.querySelector('meta[name="version"]').content.split(' ')[0];
   requestAnimationFrame(frame);
